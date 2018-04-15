@@ -1,6 +1,6 @@
 insert into owner_type(owner_type, display_name, description) VALUES
 ('household', 'Household', 'Household membership'),
-('individual', 'Individual', 'Individual membership, default terms')
+('individual', 'Individual', 'Individual membership')
 
 insert into status(status, display_name, description) VALUES
 ('active', 'Active', ''),
@@ -12,7 +12,15 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('other', 'Other',
  'If this is being used a lot, a new category should probably be created'),
 ('technology', 'Technology Committee', ''),
-('membership', 'Membership Committee', '')
+('membership', 'Membership Committee', ''),
+('sourcing', 'Sourcing Committee', ''),
+('facilities', 'Facilities Committee', ''),
+('finance', 'Finance Committee', ''),
+('governance', 'Governance Committee', ''),
+('communications', 'Communications Committee', ''),
+('environmental', 'Environmental Committee', ''),
+('outreach', 'Outreach Committee', ''),
+('board', 'Board', '')
 
 insert into equity_round(equity_round, display_name, description) VALUES
 ('2018_initial', 'Initial 2018 equity round',
