@@ -17,8 +17,17 @@ create table status (
   PRIMARY KEY(status)
 );
 
+create table household_member (
+  household_member_id int AUTO_INCREMENT,
+  email varchar(254) NOT NULL,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  phone varchar(10),
+  PRIMARY KEY(household_member_id)
+);
+
 create table owner (
-  owner_id int AUTO_INCREMENT AUTO_INCREMENT,
+  owner_id int AUTO_INCREMENT,
   old_member_id int,
   pos_id varchar(255),
   seven_shifts_id varchar(255),
@@ -42,6 +51,19 @@ create table owner (
   ON UPDATE CASCADE,
   FOREIGN KEY(status)
   REFERENCES status(status)
+  ON UPDATE CASCADE
+);
+
+create table household (
+  owner_id int,
+  household_member_id int,
+  PRIMARY KEY (owner_id, household_member_id),
+  UNIQUE KEY (household_member_id),
+  FOREIGN KEY (household_member_id)
+  REFERENCES household_member(household_member_id)
+  ON UPDATE CASCADE,
+  FOREIGN KEY (owner_id)
+  REFERENCES owner(owner_id)
   ON UPDATE CASCADE
 );
 
@@ -80,8 +102,8 @@ create table equity_round (
 );
 
 create table equity_type (
-  equity_type varchar(20) NOT NULL,
   equity_round varchar(20) NOT NULL,
+  equity_type varchar(20) NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
   display_name varchar(255) NOT NULL,
   description varchar(255),
