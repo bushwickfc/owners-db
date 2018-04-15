@@ -2,6 +2,11 @@ insert into owner_type(owner_type, display_name, description) VALUES
 ('household', 'Household', 'Household membership'),
 ('individual', 'Individual', 'Individual membership, default terms')
 
+insert into status(status, display_name, description) VALUES
+('active', 'Active', ''),
+('hold', 'Hold', ''),
+('parental', 'Parental', '')
+
 insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('shift', 'Store Shift', 'In store shift'),
 ('other', 'Other',
