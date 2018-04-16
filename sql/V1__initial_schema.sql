@@ -3,27 +3,13 @@ create table owner_type (
   owner_type varchar(20) NOT NULL,
   display_name varchar(255) NOT NULL,
   description varchar(255),
+  work_requirement int NOT NULL,
+  work_surrogate int NOT NULL,
+  shopping_surrogate int NOT NULL,
+  owner_price bit(1) NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY(owner_type)
-);
-
-create table status (
-  status varchar(20) NOT NULL,
-  display_name varchar(255) NOT NULL,
-  description varchar(255),
-  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(status)
-);
-
-create table household_member (
-  household_member_id int AUTO_INCREMENT,
-  email varchar(254) NOT NULL,
-  first_name text NOT NULL,
-  last_name text NOT NULL,
-  phone varchar(10),
-  PRIMARY KEY(household_member_id)
 );
 
 create table owner (
@@ -45,7 +31,7 @@ create table owner (
   zipcode varchar(9),
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(owner_id),
+  PRIMARY KEY (owner_id),
   FOREIGN KEY (owner_type)
   REFERENCES owner_type(owner_type)
   ON UPDATE CASCADE,
@@ -54,14 +40,26 @@ create table owner (
   ON UPDATE CASCADE
 );
 
-create table household (
-  owner_id int,
-  household_member_id int,
-  PRIMARY KEY (owner_id, household_member_id),
-  UNIQUE KEY (household_member_id),
-  FOREIGN KEY (household_member_id)
-  REFERENCES household_member(household_member_id)
+create table owner_owner_type_history (
+  owner_id int NOT NULL,
+  owner_type varchar(20) NOT NULL,
+  start_date date NOT NULL,
+  end_date date,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(owner_id, start_date),
+  FOREIGN KEY (owner_type)
+  REFERENCES owner_type(owner_type)
   ON UPDATE CASCADE,
+  FOREIGN KEY (owner_id)
+  REFERENCES owner(owner_id)
+  ON UPDATE CASCADE
+);
+
+create table household (
+  household varchar(255),
+  owner_id int,
+  PRIMARY KEY (household, owner_id),
   FOREIGN KEY (owner_id)
   REFERENCES owner(owner_id)
   ON UPDATE CASCADE
@@ -105,6 +103,7 @@ create table equity_type (
   equity_round varchar(20) NOT NULL,
   equity_type varchar(20) NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
+  payment_plan_amount DECIMAL(10,2) NOT NULL,
   display_name varchar(255) NOT NULL,
   description varchar(255),
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -118,6 +117,7 @@ create table equity_type (
 create table owner_equity_type (
   owner_id int NOT NULL,
   equity_type varchar(20) NOT NULL,
+  payment_plan bit(1) NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY(owner_id, equity_type),
