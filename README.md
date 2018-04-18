@@ -1,1 +1,1 @@
-flyway -user=root -url="jdbc:mysql://localhost/owner_db" -locations="filesystem:sql" info
+flyway -user=admin -password=admin -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:sql" info
