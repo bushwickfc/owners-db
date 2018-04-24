@@ -83,42 +83,6 @@ create table hour_log (
   ON UPDATE CASCADE
 );
 
-create table equity_round (
-  equity_round varchar(20) NOT NULL,
-  display_name varchar(255) NOT NULL,
-  description varchar(255),
-  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(equity_round)
-);
-
-create table equity_type (
-  equity_round varchar(20) NOT NULL,
-  equity_type varchar(20) NOT NULL,
-  amount DECIMAL(10,2) NOT NULL,
-  payment_plan_amount DECIMAL(10,2) NOT NULL,
-  display_name varchar(255) NOT NULL,
-  description varchar(255),
-  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(equity_type),
-  FOREIGN KEY(equity_round)
-  REFERENCES equity_round(equity_round)
-  ON UPDATE CASCADE
-);
-
-create table owner_equity_type (
-  owner_id int NOT NULL,
-  equity_type varchar(20) NOT NULL,
-  payment_plan bit(1) NOT NULL,
-  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(owner_id, equity_type),
-  FOREIGN KEY(equity_type)
-  REFERENCES equity_type(equity_type)
-  ON UPDATE CASCADE
-);
-
 create table equity_log (
   owner_id int NOT NULL,
   amount DECIMAL(10,2) NOT NULL,

@@ -22,20 +22,9 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('communications', 'Communications Committee', ''),
 ('environmental', 'Environmental Committee', ''),
 ('outreach', 'Outreach Committee', ''),
-('board', 'Board', '');
-
-insert into equity_round(equity_round, display_name, description) VALUES
-('2018_initial', 'Initial 2018 equity round',
-'The first round of equity after the transition to the equity model in 2018');
-
-insert into equity_type(equity_round, equity_type, display_name,
-                        description, amount, payment_plan_amount) VALUES
-('2018_initial', 'full', 'Full Price', 'Full price equity share', 150.00,
- 25.00),
-('2018_initial', 'legacy', 'Legacy', 'Discounted equity share', 100.00,
- 25.00),
-('2018_initial', 'reduced', 'Reduced', 'Reduced equity share', 15.00,
- 5.00);
+('board', 'Board', ''),
+('balance_carryover', 'Balance Carryover',
+ 'Balance carried over from previous database');
 
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
