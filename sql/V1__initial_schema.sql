@@ -13,7 +13,6 @@ create table owner_type (
 );
 
 create table owner (
-  owner_id int AUTO_INCREMENT,
   old_member_id int,
   pos_id varchar(255),
   seven_shifts_id varchar(255),
@@ -30,31 +29,31 @@ create table owner (
   payment_plan_delinquent bit(1),
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (owner_id)
+  PRIMARY KEY (email)
 );
 
 create table owner_owner_type (
-  owner_id int NOT NULL,
+  email varchar(255) NOT NULL,
   owner_type varchar(20) NOT NULL,
   start_date date NOT NULL,
   end_date date,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(owner_id, start_date),
+  PRIMARY KEY(email, start_date),
   FOREIGN KEY (owner_type)
   REFERENCES owner_type(owner_type)
   ON UPDATE CASCADE,
-  FOREIGN KEY (owner_id)
-  REFERENCES owner(owner_id)
+  FOREIGN KEY (email)
+  REFERENCES owner(email)
   ON UPDATE CASCADE
 );
 
 create table household (
   household varchar(255),
-  owner_id int,
-  PRIMARY KEY (household, owner_id),
-  FOREIGN KEY (owner_id)
-  REFERENCES owner(owner_id)
+  email varchar(254),
+  PRIMARY KEY (household, email),
+  FOREIGN KEY (email)
+  REFERENCES owner(email)
   ON UPDATE CASCADE
 );
 
@@ -68,30 +67,30 @@ create table hour_reason (
 );
 
 create table hour_log (
-  owner_id int NOT NULL,
+  email varchar(254) NOT NULL,
   amount int NOT NULL,
   hour_reason varchar(20) NOT NULL,
   hour_date date NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(owner_id, hour_reason, hour_date),
+  PRIMARY KEY(email, hour_reason, hour_date),
   FOREIGN KEY(hour_reason)
   REFERENCES hour_reason(hour_reason)
   ON UPDATE CASCADE,
-  FOREIGN KEY(owner_id)
-  REFERENCES owner(owner_id)
+  FOREIGN KEY(email)
+  REFERENCES owner(email)
   ON UPDATE CASCADE
 );
 
 create table equity_log (
-  owner_id int NOT NULL,
+  email varchar(254) NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
   transaction_date date NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(owner_id, transaction_date),
-  FOREIGN KEY(owner_id)
-  REFERENCES owner(owner_id)
+  PRIMARY KEY(email, transaction_date),
+  FOREIGN KEY(email)
+  REFERENCES owner(email)
   ON UPDATE CASCADE
 );
 
@@ -107,16 +106,16 @@ create table hour_status (
 
 create sql security invoker view hour_balance as
 select
-  owner_id,
+  email,
   sum(amount) as balance
 from hour_log
-group by owner_id;
+group by email;
 
 create sql security invoker view current_owner_type as
 select
   distinct
-  owner_id,
-  max(owner_type) over (partition by owner_id order by start_date desc)
+  email,
+  max(owner_type) over (partition by email order by start_date desc)
     as owner_type
 from owner_owner_type;
 
@@ -134,9 +133,9 @@ select
   (coalesce(pp.owner_price, 0) & s.owner_price & ot.owner_price)
     as owner_price
 from owner o
-join current_owner_type cot on o.owner_id = cot.owner_id
+join current_owner_type cot on o.email = cot.email
 join owner_type ot on ot.owner_type = cot.owner_type
-left join hour_balance h on o.owner_id = h.owner_id
+left join hour_balance h on o.email = h.email
 join hour_status s on
   coalesce(h.balance, 0) >= s.minimum_balance
   and coalesce(h.balance, 0) <= s.maximum_balance

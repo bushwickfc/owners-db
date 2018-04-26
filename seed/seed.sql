@@ -24,7 +24,9 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('outreach', 'Outreach Committee', ''),
 ('board', 'Board', ''),
 ('balance_carryover', 'Balance Carryover',
- 'Balance carried over from previous database');
+ 'Balance carried over from previous database'),
+('penalty', 'Penalty', 'Missed shift penalty'),
+('monthly_requirement','Monthly Requirement','Monthly work requirement');
 
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
