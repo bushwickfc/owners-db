@@ -16,6 +16,10 @@ concat(o.display_name, s.pos_display, CONVERT(pp.pos_display USING latin1)) as p
 
 in order to get it to run correctly.
 
+## pygsheets (by @darrenklein)
+
+I used pygsheets[https://github.com/nithinmurali/pygsheets] to access Google sheets. Two gitignored files are required to run this library: `client_secret.json` and `sheets.googleapis.com-python.json`
+
 ## Schema
 
 Here's a brief overview of the database schema:
