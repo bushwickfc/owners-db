@@ -18,7 +18,12 @@ in order to get it to run correctly.
 
 ## pygsheets (by @darrenklein)
 
-I used pygsheets[https://github.com/nithinmurali/pygsheets] to access Google sheets. Two gitignored files are required to run this library: `client_secret.json` and `sheets.googleapis.com-python.json`
+I used pygsheets[https://github.com/nithinmurali/pygsheets] to access Google sheets. Two top-level gitignored files are required to run this library:
+
+- `client_secret.json`
+- `sheets.googleapis.com-python.json`
+
+Following the pygsheets instruction to set up an OAuth Google API key will produce the `client_secret.json` file; when you put that in your project and run the script for the first time, you'll be prompted to visit an authorization web page and enter a secret key from that page - this will create the `sheets.googleapis.com-python.json` file automatically. 
 
 ## Schema
 
