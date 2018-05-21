@@ -7,7 +7,10 @@ def process_raw_data(owner, data_dict):
                            first_name=owner[1],
                            last_name=owner[2],
                            email=util.normalize_email(owner[3]),
-                           display_name=owner[1] + ' ' + owner[2])
+                           display_name=util.create_display_name(owner[1], owner[2]),
+                           phone=owner[4],
+                           city=owner[10],
+                           zipcode=owner[12])
 
 
 def execute(raw_data, data_dict):

@@ -1,5 +1,13 @@
 flyway -user=admin -password=admin -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:sql" info
 
+## Use
+
+To run this script, run the command
+
+```bash
+python import/run.py
+```
+
 ## Notes (by @darrenklein)
 
 In my case, I found that the flyway scripts needed to be prefixed with `./` to run... for example:
