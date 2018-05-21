@@ -1,7 +1,5 @@
+# This module will get data from Google Sheets, format it, and write it to a .csv
 import csv
-
-# Local imports...
-import import_from_google_sheet
 import util
 
 # A dict representing all of the fields in the 'owner' table.
@@ -21,11 +19,6 @@ data_dict = {
     'zipcode': None,
     'payment_plan_delinquent': None
 }
-
-# Get the raw data as a matrix
-def fetch_data():
-    print('Fetching data from Google Sheets...')
-    return import_from_google_sheet.execute()
 
 # Create a list of dictionaries, with each dictionary containing the data
 # to be inserted for that member.
@@ -55,23 +48,17 @@ def process_raw_data(raw_data):
     return owner_dict_list
 
 # Write the data to a .csv file
-def write_data_to_csv(data):
-    filename = 'new_owner_onboarding.csv'
+def write_data_to_csv(data, filename):
     print(f'Writing data to {filename}...')
     with open(filename, 'w') as new_owner_csv:
         dict_writer = csv.DictWriter(new_owner_csv, data_dict.keys())
         dict_writer.writeheader()
         dict_writer.writerows(data)
 
-# The basic flow is that we get data from Google Sheets, format it and
-# write it to a .csv, then import that .csv to the database.
-def execute():
-    raw_data = fetch_data()
+def execute(raw_data, filename):
     processed_data = process_raw_data(raw_data)
-    write_data_to_csv(processed_data)
+    write_data_to_csv(processed_data, filename)
 
-if __name__ == '__main__':
-    execute()
 
 
 

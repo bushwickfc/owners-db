@@ -1,3 +1,4 @@
+# Helper functions
 import time
 
 # Lowercase email addresses and remove whitespace.

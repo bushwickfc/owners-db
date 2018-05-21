@@ -1,6 +1,8 @@
 import pygsheets
 
+# Get the raw data as a matrix
 def execute():
+    print("Fetching data from Google Sheets...")
     # Authorize access to Google Drive/Google Sheet API
     # https://pygsheets.readthedocs.io/en/latest/authorizing.html
     gc = pygsheets.authorize(outh_file='client_secret.json', outh_nonlocal=True)

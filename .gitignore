@@ -2,3 +2,4 @@ sheets.googleapis.com-python.json
 client_secret.json
 new_owner_onboarding.csv
 import/__pycache__/
+import/credentials.py
