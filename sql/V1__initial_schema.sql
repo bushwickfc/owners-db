@@ -128,7 +128,7 @@ select
   o.email,
   o.first_name,
   o.last_name,
-  concat(o.display_name, s.pos_display, CONVERT(pp.pos_display USING latin1)) as pos_display,
+  concat(o.display_name, s.pos_display, pp.pos_display) as pos_display,
   coalesce(h.balance, 0) as hour_balance,
   (coalesce(pp.owner_price, 0) & s.owner_price & ot.owner_price)
     as owner_price

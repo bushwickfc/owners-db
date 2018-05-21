@@ -10,5 +10,5 @@ def execute():
     sh = gc.open("Copy of New Owner Onboarding")
     # Get the specific worksheet
     all_new_owners_sheet = sh.worksheet_by_title("All New Owners")
-    # Pull the values from the sheet as a matrix
+    # Pull the values from the sheet as a matrix (start at row 3, skipping test data)
     return all_new_owners_sheet.get_values(start=(3,1), end=(79,16), returnas='matrix')
