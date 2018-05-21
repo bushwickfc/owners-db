@@ -1,5 +1,25 @@
 flyway -user=admin -password=admin -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:sql" info
 
+## Setup
+
+First, run the Flyway migration script from the root of your local Flyway directory:
+
+```bash
+flyway -user=root -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:/path-to-this-app/owners-db/sql" migrate
+```
+
+in my case, this script needed to be prefixed with `./`:
+
+```bash
+./flyway -user=root -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
+```
+
+then, from within a running MySQL terminal, run the seed script:
+
+```bash
+source /path-to-this-app/owners-db/seed/seed.sql;
+```
+
 ## Use
 
 To run this script, run the command
@@ -8,15 +28,11 @@ To run this script, run the command
 python import/run.py
 ```
 
+This will pull data from the Google Sheet, format it, and insert it into a database.
+
 ## Notes (by @darrenklein)
 
-In my case, I found that the flyway scripts needed to be prefixed with `./` to run... for example:
-
-```bash
-./flyway -user=root -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
-```
-
-Also, I'm running MySQL version 8.0.11, and had an issue running the `V1_initial_schema.sql` script due to a collation issue. I had to change line 131 to read:
+I'm running MySQL version 8.0.11, and had an issue running the `V1_initial_schema.sql` script due to a collation issue. I had to change line 131 to read:
 
 ```sql
 concat(o.display_name, s.pos_display, CONVERT(pp.pos_display USING latin1)) as pos_display,
@@ -83,7 +99,7 @@ owner
 	- phone - varchar(10)
 	- address - text
 	- city - text
-	- country - text
+	- state - text
 	- zipcode - varchar(9)
 	- payment_plan_delinquent - bit(1)
 	- created_at - timestamp

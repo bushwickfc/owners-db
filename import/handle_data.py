@@ -10,6 +10,7 @@ def process_raw_data(owner, data_dict):
                            display_name=util.create_display_name(owner[1], owner[2]),
                            phone=owner[4],
                            city=owner[10],
+                           state=owner[11],
                            zipcode=owner[12])
 
 

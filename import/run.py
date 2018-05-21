@@ -18,7 +18,7 @@ data_dict = {
     'phone': None,
     'address': None,
     'city': None,
-    'country': None,
+    'state': None,
     'zipcode': None,
     'payment_plan_delinquent': None
 }

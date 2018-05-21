@@ -24,7 +24,7 @@ create table owner (
   phone varchar(10),
   address text,
   city text,
-  country text,
+  state text,
   zipcode varchar(9),
   payment_plan_delinquent bit(1),
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
