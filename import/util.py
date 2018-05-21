@@ -12,3 +12,8 @@ def create_display_name(first_name, last_name):
 def timestamp_to_date(ts):
     dt_tup = time.strptime(ts, "%m/%d/%Y %H:%M:%S")
     return str(dt_tup[0]) + "-" + str(dt_tup[1]) + "-" + str(dt_tup[2])
+
+# Clean up the building/street/unit number fields so we have a cohesive address.
+def format_address(building, street, unit):
+    building_street = building + ' ' + street
+    return building_street if unit == '' else building_street + ', ' + unit
