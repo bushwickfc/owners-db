@@ -17,3 +17,9 @@ def timestamp_to_date(ts):
 def format_address(building, street, unit):
     building_street = building + ' ' + street
     return building_street if unit == '' else building_street + ', ' + unit
+
+# From the master db data, attempt to find the matching record from the new owner signup
+# by matching on (normalized) email address. If there's a match, return the pos_id for that record.
+def get_pos_id_by_email(processed_master_db_data, email):
+    matching_rec = next((item for item in processed_master_db_data if item.get('email') == email), False)
+    return matching_rec['pos_id'] if matching_rec else None

@@ -14,7 +14,7 @@ data_dict = {
     'first_name': None,
     'last_name': None,
     'display_name': None,
-    'join_date': '2000-01-01',
+    'join_date': None,
     'phone': None,
     'address': None,
     'city': None,
@@ -24,8 +24,8 @@ data_dict = {
 }
 
 def execute():
-    raw_data = import_from_google_sheet.execute()
-    processed_data = handle_data.execute(raw_data, data_dict)
+    new_owner_raw_data, master_db_raw_data = import_from_google_sheet.execute()
+    processed_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
     insert.execute(processed_data, data_dict)
     print("Done!")
 
