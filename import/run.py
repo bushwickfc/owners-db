@@ -4,6 +4,7 @@
 import import_from_google_sheet
 import handle_data
 import insert
+import report
 
 # A dict representing all of the fields in the 'owner' table.
 data_dict = {
@@ -25,8 +26,9 @@ data_dict = {
 
 def execute():
     new_owner_raw_data, master_db_raw_data = import_from_google_sheet.execute()
-    processed_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
-    insert.execute(processed_data, data_dict)
+    owner_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
+    insert.execute(owner_data, data_dict)
+    report.execute(owner_data, data_dict)
     print("Done!")
 
 if __name__ == '__main__':
