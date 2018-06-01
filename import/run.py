@@ -21,14 +21,15 @@ data_dict = {
     'city': None,
     'state': None,
     'zipcode': None,
-    'payment_plan_delinquent': None
+    'payment_plan_delinquent': None,
+    'amount': None
 }
 
 def execute():
     new_owner_raw_data, master_db_raw_data = import_from_google_sheet.execute()
-    owner_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
-    insert.execute(owner_data, data_dict)
-    report.execute(owner_data, data_dict)
+    all_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
+    insert.execute(all_data)
+    # report.execute(owner_data, data_dict)
     print("Done!")
 
 if __name__ == '__main__':

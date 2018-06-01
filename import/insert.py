@@ -1,30 +1,74 @@
 # This module will take the data produced by handle_data and insert it into the db.
 import pymysql.cursors
+import time
 import credentials # This file is gitignored - you'll need to provide your own copy
 
-# Create the cols and params from a raw data_dict
+# Divvy up the data in the data_dict to reflect the different tables we're inserting into...
+def parse_dict(data):
+    owner_data = []
+    hour_log_data = []
+
+    for d in data:
+        current_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        owner_dict = {
+            'old_member_id': d['old_member_id'],
+            'pos_id': d['pos_id'],
+            'seven_shifts_id': d['seven_shifts_id'],
+            'email': d['email'],
+            'first_name': d['first_name'],
+            'last_name': d['last_name'],
+            'display_name': d['display_name'],
+            'join_date': d['join_date'],
+            'phone': d['phone'],
+            'address': d['address'],
+            'city': d['city'],
+            'state': d['state'],
+            'zipcode': d['zipcode'],
+            'payment_plan_delinquent': d['payment_plan_delinquent']
+        }
+        hour_log_dict = {
+            'email': d['email'],
+            'amount': d['amount'],
+            'hour_reason': 'balance_carryover',
+            'hour_date': current_date
+        }
+
+        owner_data.append(owner_dict)
+        hour_log_data.append(hour_log_dict)
+
+    return owner_data, hour_log_data
+
+# Create the cols and params from a dict from each table.
 def cols_from_dict(d):
     names = list(d.keys())
     params = ', '.join(['%({})s'.format(name) for name in names])
     cols = ', '.join(names)
     return cols, params
 
-def bulk_insert(connection, query, data):
+def bulk_insert(connection, data_query):
     with connection.cursor() as cursor:
-        for d in data:
-            cursor.execute(query, d)
+        for dq in data_query:
+            for d in dq['data']:
+                cursor.execute(dq['query'], d)
 
     connection.commit()
     connection.close()
 
-def execute(owner_data, data_dict):
+def execute(all_data):
     print('Inserting data into database...')
-    cols, params = cols_from_dict(data_dict)
     connection = pymysql.connect(host=credentials.host,
-                                 user=credentials.user,
-                                 password=credentials.password,
-                                 db=credentials.db,
-                                 cursorclass=pymysql.cursors.DictCursor)
-    query = 'INSERT INTO owner ({}) VALUES ({})'.format(cols, params)
+                             user=credentials.user,
+                             password=credentials.password,
+                             db=credentials.db,
+                             cursorclass=pymysql.cursors.DictCursor)
 
-    bulk_insert(connection, query, owner_data)
+    owner_data, hour_log_data = parse_dict(all_data)
+    owner_cols, owner_params = cols_from_dict(owner_data[0])
+    hour_log_cols, hour_log_params = cols_from_dict(hour_log_data[0])
+    owner_query = 'INSERT INTO owner ({}) VALUES ({})'.format(owner_cols, owner_params)
+    hour_log_query = 'INSERT INTO hour_log ({}) VALUES ({})'.format(hour_log_cols, hour_log_params)
+
+    data_query = [{'data': owner_data, 'query': owner_query},
+            {'data': hour_log_data, 'query': hour_log_query}]
+
+    bulk_insert(connection, data_query)

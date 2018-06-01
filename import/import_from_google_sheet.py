@@ -13,6 +13,6 @@ def execute():
     master_db_worksheet = member_database.worksheet_by_title('MASTER DB')
     # Pull the values from the sheets as a matrix
     new_owner_data = new_owner_worksheet.get_values(start=(3,1), end=(79,16), returnas='matrix')
-    master_db_data = master_db_worksheet.get_values(start=(2,1), end=(408,15), returnas='matrix')
+    master_db_data = master_db_worksheet.get_values(start=(2,2), end=(408,16), returnas='matrix')
 
     return new_owner_data, master_db_data
