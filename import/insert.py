@@ -7,6 +7,7 @@ import credentials # This file is gitignored - you'll need to provide your own c
 def parse_dict(data):
     owner_data = []
     hour_log_data = []
+    owner_owner_type_data = []
 
     for d in data:
         current_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
@@ -26,17 +27,25 @@ def parse_dict(data):
             'zipcode': d['zipcode'],
             'payment_plan_delinquent': d['payment_plan_delinquent']
         }
+        # In this import script, all hours logged are balance_carryovers...
+        # and I presume that the hour_date would just be the date of the import.
         hour_log_dict = {
             'email': d['email'],
             'amount': d['amount'],
             'hour_reason': 'balance_carryover',
             'hour_date': current_date
         }
+        owner_owner_type_dict = {
+            'email': d['email'],
+            'start_date': d['join_date'],
+            'owner_type': d['owner_type']
+        }
 
         owner_data.append(owner_dict)
         hour_log_data.append(hour_log_dict)
+        owner_owner_type_data.append(owner_owner_type_dict)
 
-    return owner_data, hour_log_data
+    return owner_data, hour_log_data, owner_owner_type_data
 
 # Create the cols and params from a dict from each table.
 def cols_from_dict(d):
@@ -62,13 +71,18 @@ def execute(all_data):
                              db=credentials.db,
                              cursorclass=pymysql.cursors.DictCursor)
 
-    owner_data, hour_log_data = parse_dict(all_data)
+    owner_data, hour_log_data, owner_owner_type_data = parse_dict(all_data)
+
     owner_cols, owner_params = cols_from_dict(owner_data[0])
     hour_log_cols, hour_log_params = cols_from_dict(hour_log_data[0])
+    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(owner_owner_type_data[0])
+
     owner_query = 'INSERT INTO owner ({}) VALUES ({})'.format(owner_cols, owner_params)
     hour_log_query = 'INSERT INTO hour_log ({}) VALUES ({})'.format(hour_log_cols, hour_log_params)
+    owner_owner_type_query = 'INSERT INTO owner_owner_type ({}) VALUES ({})'.format(owner_owner_type_cols, owner_owner_type_params)
 
     data_query = [{'data': owner_data, 'query': owner_query},
-            {'data': hour_log_data, 'query': hour_log_query}]
+                  {'data': hour_log_data, 'query': hour_log_query},
+                  {'data': owner_owner_type_data, 'query': owner_owner_type_query}]
 
     bulk_insert(connection, data_query)

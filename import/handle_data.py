@@ -1,5 +1,6 @@
 # This module will get data from Google Sheets and format it as a list of dicts
 import time
+import difflib
 
 # Lowercase email addresses and remove whitespace.
 def normalize_email(email):
@@ -24,6 +25,14 @@ def convert_hours(hours):
         return float(0)
     else:
         return float(hours)
+
+# Convert the string from the new owner sheet into a category matching the types in the owner_type table.
+def convert_owner_type(owner_type):
+    types = ['disability', 'family_leave', 'hold', 'inactive', 'parental', 'pregnancy', 'senior', 'standard']
+    # For at least 'Standard / Estander', 'Parent/Guardian - Padre/Guardián', and 'Senior (65+) / Adulto Mayor (65+)',
+    # these settings for difflib.get_close_matches() returns the correct type.
+    # https://docs.python.org/3/library/difflib.html#difflib.get_close_matches
+    return difflib.get_close_matches(owner_type, types, 1, 0.2)[0]
 
 # Pull some important values out of each line of the master db - POS IDs (rd[0]) and banked hours (rd[14]).
 # Old member accounts will be associated with new owner accounts by email, so make a dict with the email as the key and [POS ID, banked hours] as the value
@@ -59,7 +68,8 @@ def process_raw_data(owner, processed_master_db_data, data_dict):
                            city=owner[10],
                            state=owner[11],
                            zipcode=owner[12],
-                           amount=get_amount_by_email(processed_master_db_data, email))
+                           amount=get_amount_by_email(processed_master_db_data, email),
+                           owner_type=convert_owner_type(owner[14]))
 
 def execute(new_owner_raw_data, master_db_raw_data, data_dict):
     print("Processing raw data...")
