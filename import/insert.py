@@ -28,13 +28,14 @@ def parse_dict(data):
             'payment_plan_delinquent': d['payment_plan_delinquent']
         }
         # In this import script, all hours logged are balance_carryovers...
-        # and I presume that the hour_date would just be the date of the import.
+        # and I assume that the hour_date would just be the date of the import.
         hour_log_dict = {
             'email': d['email'],
             'amount': d['amount'],
             'hour_reason': 'balance_carryover',
             'hour_date': current_date
         }
+        # In this case, I assume that start_date is the same as join_date. 
         owner_owner_type_dict = {
             'email': d['email'],
             'start_date': d['join_date'],
