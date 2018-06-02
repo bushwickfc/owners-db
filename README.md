@@ -1,23 +1,23 @@
-flyway -user=admin -password=admin -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:sql" info
+flyway -user=admin -password=admin -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:sql" info
 
 ## Setup
 
 First, run the Flyway migration script from the root of your local Flyway directory:
 
 ```bash
-flyway -user=root -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:/path-to-this-app/owners-db/sql" migrate
+flyway -user=root -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:/path-to-this-app/owners-db/sql" migrate
 ```
 
 in my case, this script needed to be prefixed with `./`:
 
 ```bash
-./flyway -user=root -url="jdbc:mysql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
+./flyway -user=root -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
 ```
 
-then, from within a running MySQL terminal, run the seed script:
+then, load the seed data:
 
 ```bash
-source /path-to-this-app/owners-db/seed/seed.sql;
+psql -U root -d owners_db -f seed/seed.sql
 ```
 
 ## Use
@@ -81,7 +81,7 @@ hour_status
 	- pos_display - varchar(255)
 	- minimum_balance - int(11)
 	- maximum_balance - int(11)
-	- owner_price - bit(1)
+	- owner_price - boolean
 
 household
 	- household - varchar(255)
@@ -101,7 +101,7 @@ owner
 	- city - text
 	- state - text
 	- zipcode - varchar(9)
-	- payment_plan_delinquent - bit(1)
+	- payment_plan_delinquent - boolean
 	- created_at - timestamp
 	- updated_at - timestamp
 
@@ -120,7 +120,7 @@ owner_type
 	- work_requirement - int(11)
 	- work_surrogate - int(11)
 	- shopping_surrogate - int(11)
-	- owner_price - bit(1)
+	- owner_price - boolean
 	- created_at - timestamp
 	- updated_at - timestamp
 
@@ -134,4 +134,4 @@ owner_view
 	- last_name - text
 	- pos_display - mediumtext
 	- hour_balance - decimal(32,0)
-	- owner_price - bigint(21) unsigned
+	- owner_price - boolean

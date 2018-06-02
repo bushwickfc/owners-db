@@ -1,13 +1,13 @@
 insert into owner_type(owner_type, display_name, work_requirement,
                        work_surrogate, shopping_surrogate, owner_price) VALUES
-('standard', 'Standard', 3, 0, 0, 1),
-('senior', 'Senior', 2, 1, 1, 1),
-('parental', 'Parent/Guardian', 2, 1, 1, 1),
-('disability','Disabled/Injured', 0, 0, 1, 1),
-('pregnancy', 'Pregnancy', 0, 0, 1, 1),
-('family_leave', 'Family Leave', 0, 0, 1, 1),
-('hold', 'Hold', 0, 0, 0, 0),
-('inactive', 'Inactive', 0, 0, 0, 0);
+('standard', 'Standard', 3, 0, 0, true),
+('senior', 'Senior', 2, 1, 1, true),
+('parental', 'Parent/Guardian', 2, 1, 1, true),
+('disability','Disabled/Injured', 0, 0, 1, true),
+('pregnancy', 'Pregnancy', 0, 0, 1, true),
+('family_leave', 'Family Leave', 0, 0, 1, true),
+('hold', 'Hold', 0, 0, 0, false),
+('inactive', 'Inactive', 0, 0, 0, false);
 
 insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('shift', 'Store Shift', 'In store shift'),
@@ -30,6 +30,7 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
-('good_standing', 'Good Standing', ' // Active', 1, 0, 2147483647),
-('hours_alert', 'Hours Alert', ' // Hours Alert', 1, -7, -1),
-('hours_suspended', 'Hours Suspended', ' // Hours Susp.', 0, -2147483648, -8)
+('good_standing', 'Good Standing', ' // Active', true, 0, 2147483647),
+('hours_alert', 'Hours Alert', ' // Hours Alert', true, -7, -1),
+('hours_suspended', 'Hours Suspended', ' // Hours Susp.', false, -2147483648,
+-8)
