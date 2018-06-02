@@ -1,1 +1,2 @@
-PyMySQL==0.8.0
+pygsheets
+psycopg2-binary

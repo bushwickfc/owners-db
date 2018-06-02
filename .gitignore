@@ -4,3 +4,4 @@ new_owner_onboarding.csv
 import/__pycache__/
 import/credentials.py
 no_pos_id.csv
+*.pyc

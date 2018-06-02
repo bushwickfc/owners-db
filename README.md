@@ -1,6 +1,6 @@
 flyway -user=admin -password=admin -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:sql" info
 
-## Setup
+##Setup
 
 First, run the Flyway migration script from the root of your local Flyway directory:
 
@@ -8,29 +8,29 @@ First, run the Flyway migration script from the root of your local Flyway direct
 flyway -user=root -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:/path-to-this-app/owners-db/sql" migrate
 ```
 
-in my case, this script needed to be prefixed with `./`:
+in my case, this script needed to be prefixed with `./` and the `user` needed to be set as `postgres` :
 
 ```bash
-./flyway -user=root -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
+./flyway -user=postgres -url="jdbc:postgresql://localhost/owners_db" -locations="filesystem:/Users/darrenklein/desktop/darren/development/bushwickfc/owners-db/sql" migrate
 ```
 
 then, load the seed data:
 
 ```bash
-psql -U root -d owners_db -f seed/seed.sql
+psql -U postgres -d owners_db -f seed/seed.sql
 ```
 
-## Use
+##Use
 
 To run this script, run the command
 
 ```bash
-python import/run.py
+python3 import/run.py
 ```
 
 This will pull data from the Google Sheet, format it, and insert it into a database.
 
-## Notes (by @darrenklein)
+##Notes (by @darrenklein)
 
 I'm running MySQL version 8.0.11, and had an issue running the `V1_initial_schema.sql` script due to a collation issue. I had to change line 131 to read:
 
@@ -40,98 +40,22 @@ concat(o.display_name, s.pos_display, CONVERT(pp.pos_display USING latin1)) as p
 
 in order to get it to run correctly.
 
-## pygsheets (by @darrenklein)
+##pygsheets
 
 I used pygsheets[https://github.com/nithinmurali/pygsheets] to access Google sheets. Two top-level gitignored files are required to run this library:
 
 - `client_secret.json`
 - `sheets.googleapis.com-python.json`
 
-Following the pygsheets instruction to set up an OAuth Google API key will produce the `client_secret.json` file; when you put that in your project and run the script for the first time, you'll be prompted to visit an authorization web page and enter a secret key from that page - this will create the `sheets.googleapis.com-python.json` file automatically. 
+Following the pygsheets instruction to set up an OAuth Google API key will produce the `client_secret.json` file; when you put that in your project and run the script for the first time, you'll be prompted to visit an authorization web page and enter a secret key from that page - this will create the `sheets.googleapis.com-python.json` file automatically.
 
-## Schema
+##psycopg2
 
-Here's a brief overview of the database schema:
+This script uses psycopg2 to insert the data into Postgres. psycopg2, of course, requires databse credentials, which are gitignored. To run this script, you'll need a local copy of the file `import/credentials.py`, formatted like so:
 
-current_owner_type
-	- email - varchar(255)
-	- owner_type - varchar(20)
-
-equity_log
-	- email - varchar(254)
-	- amount - decimal(10,2)
-	- transaction_date - date
-	- created_at - timestamp
-	- updated_at - timestamp
-
-hour_balance
-	- email - varchar(254)
-	- balance - decimal(32,0)
-
-hour_reason
-	- hour_reason - varchar(20)
-	- display_name - varchar(255)
-	- description - varchar(255)
-	- created_at - timestamp
-	- updated_at - timestamp
-
-hour_status
-	- status - varchar(20)
-	- display_name - varchar(255)
-	- pos_display - varchar(255)
-	- minimum_balance - int(11)
-	- maximum_balance - int(11)
-	- owner_price - boolean
-
-household
-	- household - varchar(255)
-	- email - varchar(254)
-
-owner
-	- old_member_id - int(11)
-	- pos_id - varchar(255)
-	- seven_shifts_id - varchar(255)
-	- email - varchar(254)
-	- first_name - text
-	- last_name - text
-	- display_name - text
-	- join_date - date
-	- phone - varchar(10)
-	- address - text
-	- city - text
-	- state - text
-	- zipcode - varchar(9)
-	- payment_plan_delinquent - boolean
-	- created_at - timestamp
-	- updated_at - timestamp
-
-owner_owner_type
-	- email - varchar(255)
-	- owner_type - varchar(20)
-	- start_date - date
-	- end_date - date
-	- created_at - timestamp
-	- updated_at - timestamp
-
-owner_type
-	- owner_type - varchar(20)
-	- display_name - varchar(255)
-	- description - varchar(255)
-	- work_requirement - int(11)
-	- work_surrogate - int(11)
-	- shopping_surrogate - int(11)
-	- owner_price - boolean
-	- created_at - timestamp
-	- updated_at - timestamp
-
-owner_view
-	- pos_id - varchar(255)
-	- owner_type - varchar(20)
-	- owner_type_name - varchar(255)
-	- status - varchar(20)
-	- email - varchar(254)
-	- first_name - text
-	- last_name - text
-	- pos_display - mediumtext
-	- hour_balance - decimal(32,0)
-	- owner_price - boolean
+```python
+user = 'postgres'
+password = 'password'
+dbname = 'owners_db'
+host = 'localhost'
+```

@@ -1,5 +1,5 @@
 # This module will take the data produced by handle_data and insert it into the db.
-import pymysql.cursors
+import psycopg2
 import time
 import credentials # This file is gitignored - you'll need to provide your own copy
 
@@ -62,15 +62,15 @@ def bulk_insert(connection, data_query):
                 cursor.execute(dq['query'], d)
 
     connection.commit()
+    cursor.close()
     connection.close()
 
 def execute(all_data):
     print('Inserting data into database...')
-    connection = pymysql.connect(host=credentials.host,
-                             user=credentials.user,
-                             password=credentials.password,
-                             db=credentials.db,
-                             cursorclass=pymysql.cursors.DictCursor)
+    connection = psycopg2.connect(f'''host={credentials.host}
+                                      user={credentials.user}
+                                      password={credentials.password}
+                                      dbname={credentials.dbname}''')
 
     owner_data, hour_log_data, owner_owner_type_data = parse_dict(all_data)
 
