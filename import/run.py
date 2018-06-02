@@ -7,6 +7,7 @@ import insert
 import report
 
 # A dict representing all of the fields of interest.
+# This will get split off as needed into different tables by insert.py.
 data_dict = {
     'old_member_id': None,
     'pos_id': None,
@@ -30,7 +31,7 @@ def execute():
     new_owner_raw_data, master_db_raw_data = import_from_google_sheet.execute()
     all_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
     insert.execute(all_data)
-    # report.execute(all_data, data_dict)
+    report.execute(all_data, data_dict)
     print("Done!")
 
 if __name__ == '__main__':
