@@ -3,8 +3,8 @@ import psycopg2
 import time
 import credentials # This file is gitignored - you'll need to provide your own copy
 
-# Divvy up the data in the data_dict to reflect the different tables we're inserting into...
-def parse_dict(data):
+# Divvy up the data for the data_dict-formatted owner to reflect the different tables we're inserting into...
+def dict_to_tables(data):
     owner_data = []
     hour_log_data = []
     owner_owner_type_data = []
@@ -55,9 +55,9 @@ def cols_from_dict(d):
     cols = ', '.join(names)
     return cols, params
 
-def bulk_insert(connection, data_query):
+def bulk_insert(connection, data_query_dicts):
     with connection.cursor() as cursor:
-        for dq in data_query:
+        for dq in data_query_dicts:
             for d in dq['data']:
                 cursor.execute(dq['query'], d)
 
@@ -72,18 +72,22 @@ def execute(all_data):
                                       password={credentials.password}
                                       dbname={credentials.dbname}''')
 
-    owner_data, hour_log_data, owner_owner_type_data = parse_dict(all_data)
+    # Split up each owner's data into set of related table data to be inserted
+    owner_data, hour_log_data, owner_owner_type_data = dict_to_tables(all_data)
 
+    # Using a sample from each set of data, turn the keys into cols and params
     owner_cols, owner_params = cols_from_dict(owner_data[0])
     hour_log_cols, hour_log_params = cols_from_dict(hour_log_data[0])
     owner_owner_type_cols, owner_owner_type_params = cols_from_dict(owner_owner_type_data[0])
 
+    # Create a query for each table
     owner_query = 'INSERT INTO owner ({}) VALUES ({})'.format(owner_cols, owner_params)
     hour_log_query = 'INSERT INTO hour_log ({}) VALUES ({})'.format(hour_log_cols, hour_log_params)
     owner_owner_type_query = 'INSERT INTO owner_owner_type ({}) VALUES ({})'.format(owner_owner_type_cols, owner_owner_type_params)
 
-    data_query = [{'data': owner_data, 'query': owner_query},
-                  {'data': hour_log_data, 'query': hour_log_query},
-                  {'data': owner_owner_type_data, 'query': owner_owner_type_query}]
+    # Finally, put each set of data and its associated query into a list of dicts to be iterated through
+    data_query_dicts = [{'data': owner_data, 'query': owner_query},
+                        {'data': hour_log_data, 'query': hour_log_query},
+                        {'data': owner_owner_type_data, 'query': owner_owner_type_query}]
 
-    bulk_insert(connection, data_query)
+    bulk_insert(connection, data_query_dicts)
