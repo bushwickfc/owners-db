@@ -41,17 +41,17 @@ def process_master_db_data(master_db_raw_data):
 
 # Get the old member id...
 def get_old_member_id_by_email(master_db_data, email):
-  return master_db_data[email][0] if email in master_db_data and master_db_data[email] != '' else None
+  return master_db_data[email][0] if email in master_db_data and master_db_data[email][0] != '' else None
 
 # From the master db data, attempt to find the matching record from the new owner signup
 # by matching on (normalized) email address. If there's a match, return the pos_id for that record.
 def get_pos_id_by_email(master_db_data, email):
-    return master_db_data[email][1] if email in master_db_data and master_db_data[email] != '' else None
+    return master_db_data[email][1] if email in master_db_data and master_db_data[email][1] != '' else None
 
 # From the master db data, attempt to find the matching record from the new owner signup
 # and return the banked_hours, or 0.0 if there are none.
 def get_amount_by_email(master_db_data, email):
-    return master_db_data[email][2] if email in master_db_data and master_db_data[email] != '' else float(0)
+    return master_db_data[email][2] if email in master_db_data and master_db_data[email][2] != '' else float(0)
 
 # From each row and the data_dict, create a dictionary for each owner
 def process_raw_data(owner, processed_master_db_data, data_dict):
