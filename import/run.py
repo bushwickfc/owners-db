@@ -15,7 +15,6 @@ data_dict = {
     'email': None,
     'first_name': None,
     'last_name': None,
-    'display_name': None,
     'join_date': None,
     'phone': None,
     'address': None,

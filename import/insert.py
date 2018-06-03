@@ -18,7 +18,6 @@ def dict_to_tables(data):
             'email': d['email'],
             'first_name': d['first_name'],
             'last_name': d['last_name'],
-            'display_name': d['display_name'],
             'join_date': d['join_date'],
             'phone': d['phone'],
             'address': d['address'],

@@ -19,7 +19,6 @@ create table owner (
   email varchar(254) NOT NULL,
   first_name text NOT NULL,
   last_name text NOT NULL,
-  display_name text,
   join_date date NOT NULL,
   phone varchar(10),
   address text,
@@ -128,7 +127,7 @@ select
   o.email,
   o.first_name,
   o.last_name,
-  concat(o.display_name, s.pos_display, pp.pos_display) as pos_display,
+  concat(o.first_name, ' ', o.last_name, s.pos_display, pp.pos_display) as pos_display,
   coalesce(h.balance, 0) as hour_balance,
   (coalesce(pp.owner_price, TRUE) AND s.owner_price AND ot.owner_price)
     as owner_price
