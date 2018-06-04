@@ -31,34 +31,27 @@ def convert_owner_type(owner_type):
     # https://docs.python.org/3/library/difflib.html#difflib.get_close_matches
     return difflib.get_close_matches(owner_type, types, 1, 0.2)[0]
 
-# Pull some important values out of each line of the master db - old member ID (rd[0]) POS IDs (rd[1]) and banked hours (rd[15]).
+# Pull some important values out of each line of the master db and put them in a dict with the email as the key.
 def process_master_db_data(master_db_raw_data):
     master_db_dict = {}
     for rd in master_db_raw_data:
-        master_db_dict[normalize_email(rd[5])] = [rd[0], rd[1], convert_hours(rd[15])]
+        master_db_dict[normalize_email(rd[5])] = {'old_member_id': rd[0],
+                                                  'pos_id': rd[1],
+                                                  'banked_hours': convert_hours(rd[15])}
 
     return master_db_dict
 
-# Get the old member id...
-def get_old_member_id_by_email(master_db_data, email):
-  return master_db_data[email][0] if email in master_db_data and master_db_data[email][0] != '' else None
-
-# From the master db data, attempt to find the matching record from the new owner signup
-# by matching on (normalized) email address. If there's a match, return the pos_id for that record.
-def get_pos_id_by_email(master_db_data, email):
-    return master_db_data[email][1] if email in master_db_data and master_db_data[email][1] != '' else None
-
-# From the master db data, attempt to find the matching record from the new owner signup
-# and return the banked_hours, or 0.0 if there are none.
-def get_amount_by_email(master_db_data, email):
-    return master_db_data[email][2] if email in master_db_data and master_db_data[email][2] != '' else float(0)
+# Based on the attr argument, get the value from the dicts of master_db data.
+def get_val_from_master_by_email(master_db_data, email, attr):
+    val = float(0) if attr == 'banked_hours' else None
+    return master_db_data[email][attr] if email in master_db_data and master_db_data[email][attr] != '' else val
 
 # From each row and the data_dict, create a dictionary for each owner
 def process_raw_data(owner, processed_master_db_data, data_dict):
     email = normalize_email(owner[3])
 
     return dict(data_dict, join_date=timestamp_to_date(owner[0]),
-                           pos_id=get_pos_id_by_email(processed_master_db_data, email),
+                           pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
                            first_name=owner[1],
                            last_name=owner[2],
                            email=email,
@@ -67,9 +60,9 @@ def process_raw_data(owner, processed_master_db_data, data_dict):
                            city=owner[10],
                            state=owner[11],
                            zipcode=owner[12],
-                           amount=get_amount_by_email(processed_master_db_data, email),
+                           amount=get_val_from_master_by_email(processed_master_db_data, email, 'banked_hours'),
                            owner_type=convert_owner_type(owner[14]),
-                           old_member_id=get_old_member_id_by_email(processed_master_db_data, email))
+                           old_member_id=get_val_from_master_by_email(processed_master_db_data, email, 'old_member_id'))
 
 def execute(new_owner_raw_data, master_db_raw_data, data_dict):
     print("Processing raw data...")
