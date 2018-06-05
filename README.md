@@ -54,7 +54,13 @@ To run this script, run the command
 python3 import/run.py
 ```
 
-This will pull data from the Google Sheet, format it, and insert it into a database. It will also produce a .csv file named 'no_pos_id.csv' in this script's root directory.
+This will pull data from the Google Sheet, format it, and insert it into a database. It will also produce a .csv file named 'no_pos_id.csv' in this script's root directory. After the inserts have been run, a list of successful/failed inserts will be printed to the console.
+
+####Idempotency
+
+Across tables, an owner is identified by their email address. When this script runs, the function `exists/3` in `insert.py` will check before each insert to see if a record for that owner already exists on that table. If so, it will quietly skip the insert; otherwise, it will go ahead and attempt the insert.
+
+It should be safe to run this script repeatedly against the same database instance.
 
 ##pygsheets
 

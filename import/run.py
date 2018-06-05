@@ -4,6 +4,7 @@
 import import_from_google_sheet
 import handle_data
 import insert
+import write_to_console
 import report
 
 # A dict representing all of the fields of interest.
@@ -58,9 +59,10 @@ owner_owner_type_dict = {
 def execute():
     new_owner_raw_data, master_db_raw_data = import_from_google_sheet.execute()
     master_data = handle_data.execute(new_owner_raw_data, master_db_raw_data, data_dict)
-    insert.execute(master_data, {'owner_dict': owner_dict,
-                                 'hour_log_dict': hour_log_dict,
-                                 'owner_owner_type_dict': owner_owner_type_dict})
+    success, error = insert.execute(master_data, {'owner_dict': owner_dict,
+                                                  'hour_log_dict': hour_log_dict,
+                                                  'owner_owner_type_dict': owner_owner_type_dict})
+    write_to_console.execute([success, error])
     report.execute(master_data, data_dict)
     print("Done!")
 

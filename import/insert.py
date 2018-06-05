@@ -55,17 +55,30 @@ def exists(cursor, table, email):
     cursor.execute(query)
     return False if cursor.fetchone() == None else True
 
+# Handle the data insert.
+# We want this script to be idempotent, so before every insert, check to see whether
+# or not a record associated with that email address already exists for that table.
 def bulk_insert(connection, data_query_dicts):
+    success = []
+    error = []
     with connection.cursor() as cursor:
         for dq in data_query_dicts:
             query = f'INSERT INTO {dq["table"]} ({{}}) VALUES ({{}})'.format(dq['cols'], dq['params'])
             for d in dq['data']:
-                if not exists(cursor, dq['table'], d['email']):
-                    cursor.execute(query, d)
+                table = dq['table']
+                email = d['email']
+                if not exists(cursor, table, email):
+                    try:
+                        cursor.execute(query, d)
+                        success.append({'message': f'success: inserted record for {email} into table {table}'})
+                    except:
+                        error.append({'message': f'error: failed to insert record for {email} into table {table}'})
 
     connection.commit()
     cursor.close()
     connection.close()
+
+    return success, error
 
 def execute(master_data, table_dicts):
     print('Inserting data into database...')
@@ -82,9 +95,9 @@ def execute(master_data, table_dicts):
     hour_log_cols, hour_log_params = cols_from_dict(table_dicts['hour_log_dict'])
     owner_owner_type_cols, owner_owner_type_params = cols_from_dict(table_dicts['owner_owner_type_dict'])
 
-    # Finally, put each set of data and its associated query cols and params into a list of dicts to be iterated through
+    # Finally, put each set of data and its associated data for building the query into a list of dicts...
     data_query_dicts = [{'data': owner_data, 'cols': owner_cols, 'params': owner_params, 'table': 'owner'},
                         {'data': hour_log_data, 'cols': hour_log_cols, 'params': hour_log_params, 'table': 'hour_log'},
                         {'data': owner_owner_type_data, 'cols': owner_owner_type_cols, 'params': owner_owner_type_params, 'table': 'owner_owner_type'}]
 
-    bulk_insert(connection, data_query_dicts)
+    return bulk_insert(connection, data_query_dicts)
