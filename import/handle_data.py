@@ -1,4 +1,4 @@
-# This module will get data from Google Sheets and format it as a list of dicts
+# This module will ingest the data from Google Sheets, do some processing, and format it as a list of dicts.
 import time
 import difflib
 

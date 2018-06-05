@@ -3,43 +3,37 @@ import psycopg2
 import time
 import credentials # This file is gitignored - you'll need to provide your own copy
 
-# Divvy up the data for the data_dict-formatted owner to reflect the different tables we're inserting into...
-def dict_to_tables(data):
+# Divvy up the data for the data_dict-formatted owner (a row in master_date) to reflect the different tables we're inserting into...
+def dict_to_tables(master_data, table_dicts):
     owner_data = []
     hour_log_data = []
     owner_owner_type_data = []
 
-    for d in data:
+    for d in master_data:
         current_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-        owner_dict = {
-            'old_member_id': d['old_member_id'],
-            'pos_id': d['pos_id'],
-            'seven_shifts_id': d['seven_shifts_id'],
-            'email': d['email'],
-            'first_name': d['first_name'],
-            'last_name': d['last_name'],
-            'join_date': d['join_date'],
-            'phone': d['phone'],
-            'address': d['address'],
-            'city': d['city'],
-            'state': d['state'],
-            'zipcode': d['zipcode'],
-            'payment_plan_delinquent': d['payment_plan_delinquent']
-        }
+        owner_dict = dict(table_dicts['owner_dict'], old_member_id=d['old_member_id'],
+                                                     pos_id=d['pos_id'],
+                                                     seven_shifts_id=d['seven_shifts_id'],
+                                                     email=d['email'],
+                                                     first_name=d['first_name'],
+                                                     last_name=d['last_name'],
+                                                     join_date=d['join_date'],
+                                                     phone=d['phone'],
+                                                     address=d['address'],
+                                                     city=d['city'],
+                                                     state=d['state'],
+                                                     zipcode=d['zipcode'],
+                                                     payment_plan_delinquent=d['payment_plan_delinquent'])
         # In this import script, all hours logged are balance_carryovers...
         # and I assume that the hour_date would just be the date of the import.
-        hour_log_dict = {
-            'email': d['email'],
-            'amount': d['amount'],
-            'hour_reason': 'balance_carryover',
-            'hour_date': current_date
-        }
-        # In this case, I assume that start_date is the same as join_date. 
-        owner_owner_type_dict = {
-            'email': d['email'],
-            'start_date': d['join_date'],
-            'owner_type': d['owner_type']
-        }
+        hour_log_dict = dict(table_dicts['hour_log_dict'], email=d['email'],
+                                                           amount=d['amount'],
+                                                           hour_reason='balance_carryover',
+                                                           hour_date=current_date)
+        # In this case, I assume that start_date is the same as join_date.
+        owner_owner_type_dict = dict(table_dicts['owner_owner_type_dict'], email=d['email'],
+                                                                           start_date=d['join_date'],
+                                                                           owner_type=d['owner_type'])
 
         owner_data.append(owner_dict)
         hour_log_data.append(hour_log_dict)
@@ -54,39 +48,43 @@ def cols_from_dict(d):
     cols = ', '.join(names)
     return cols, params
 
+# An owner's email address is their unique identifier across tables. In order to make this script
+# safe to re-run, check to see whether an associated owner record already exists for a particular table.
+def exists(cursor, table, email):
+    query = f'SELECT * FROM {table} WHERE email=\'{email}\''
+    cursor.execute(query)
+    return False if cursor.fetchone() == None else True
+
 def bulk_insert(connection, data_query_dicts):
     with connection.cursor() as cursor:
         for dq in data_query_dicts:
+            query = f'INSERT INTO {dq["table"]} ({{}}) VALUES ({{}})'.format(dq['cols'], dq['params'])
             for d in dq['data']:
-                cursor.execute(dq['query'], d)
+                if not exists(cursor, dq['table'], d['email']):
+                    cursor.execute(query, d)
 
     connection.commit()
     cursor.close()
     connection.close()
 
-def execute(all_data):
+def execute(master_data, table_dicts):
     print('Inserting data into database...')
     connection = psycopg2.connect(f'''host={credentials.host}
                                       user={credentials.user}
                                       password={credentials.password}
                                       dbname={credentials.dbname}''')
 
-    # Split up each owner's data into set of related table data to be inserted
-    owner_data, hour_log_data, owner_owner_type_data = dict_to_tables(all_data)
+    # Split up each owner's master_data into set of related table data to be inserted
+    owner_data, hour_log_data, owner_owner_type_data = dict_to_tables(master_data, table_dicts)
 
-    # Using a sample from each set of data, turn the keys into cols and params
-    owner_cols, owner_params = cols_from_dict(owner_data[0])
-    hour_log_cols, hour_log_params = cols_from_dict(hour_log_data[0])
-    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(owner_owner_type_data[0])
+    # Using each table dict, turn the keys into cols and params
+    owner_cols, owner_params = cols_from_dict(table_dicts['owner_dict'])
+    hour_log_cols, hour_log_params = cols_from_dict(table_dicts['hour_log_dict'])
+    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(table_dicts['owner_owner_type_dict'])
 
-    # Create a query for each table
-    owner_query = 'INSERT INTO owner ({}) VALUES ({})'.format(owner_cols, owner_params)
-    hour_log_query = 'INSERT INTO hour_log ({}) VALUES ({})'.format(hour_log_cols, hour_log_params)
-    owner_owner_type_query = 'INSERT INTO owner_owner_type ({}) VALUES ({})'.format(owner_owner_type_cols, owner_owner_type_params)
-
-    # Finally, put each set of data and its associated query into a list of dicts to be iterated through
-    data_query_dicts = [{'data': owner_data, 'query': owner_query},
-                        {'data': hour_log_data, 'query': hour_log_query},
-                        {'data': owner_owner_type_data, 'query': owner_owner_type_query}]
+    # Finally, put each set of data and its associated query cols and params into a list of dicts to be iterated through
+    data_query_dicts = [{'data': owner_data, 'cols': owner_cols, 'params': owner_params, 'table': 'owner'},
+                        {'data': hour_log_data, 'cols': hour_log_cols, 'params': hour_log_params, 'table': 'hour_log'},
+                        {'data': owner_owner_type_data, 'cols': owner_owner_type_cols, 'params': owner_owner_type_params, 'table': 'owner_owner_type'}]
 
     bulk_insert(connection, data_query_dicts)

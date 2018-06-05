@@ -1,3 +1,4 @@
+# This module will retrieve the data from the Google Sheets via pygsheets.
 import pygsheets
 
 # Get the raw data as a matrix

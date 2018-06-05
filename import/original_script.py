@@ -1,4 +1,5 @@
 # The script, as originally written by Kevin
+# Keeping for posterity and inspiration.
 
 # import argparse
 # import csv
