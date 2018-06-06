@@ -36,7 +36,7 @@ def convert_owner_type(owner_type):
 # Any incorrectly typed or empty string values should be zeroed out,
 # and any valid negative values should be zeroed out.
 def convert_hours(hours):
-    if (not isfloat(hours) or hours == '') or float(hours) < 0:
+    if not isfloat(hours) or hours == '' or float(hours) < 0:
         return float(0)
     else:
         return float(hours)
