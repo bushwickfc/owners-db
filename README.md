@@ -2,7 +2,7 @@
 
 In the spring of 2018, the Bushwick Food Co-op transitioned from a member/dues-based model to an owner/equity-based model, and all existing members had to effectively terminate their memberships and re-register as owners. These registration records were initially stored in a Google Sheet...
 
-The main function of this script is to fetch the new ownership data (as well as some historic membership data), sort through it, and insert it into our new Postgres database. Running the script will also output a file named 'no_pos_id.csv' to the root directory, which contains a list of owners who could not be associated by email address with an existing id in our POS.
+The main function of this script is to fetch the new ownership data (as well as some historic membership data), sort through it, and insert it into our new Postgres database. Running the script will also output a file named 'no_old_member_id.csv' to the root directory, which contains a list of owners who, for one reason or another, could not be associated by email address with a matching record in the old Members DB (additional action may need to be taken for these owners - see the comments in `import/report.py` for more info).
 
 ##Setup
 
@@ -54,7 +54,7 @@ To run this script, run the command
 python3 import/run.py
 ```
 
-This will pull data from the Google Sheet, format it, and insert it into a database. It will also produce a .csv file named 'no_pos_id.csv' in this script's root directory. After the inserts have been run, a list of successful/failed inserts will be printed to the console.
+This will pull data from the Google Sheet, format it, and insert it into a database. It will also produce a .csv file named 'no_old_member_id.csv' in this script's root directory. After the inserts have been run, a list of successful/failed inserts will be printed to the console.
 
 ####Idempotency
 

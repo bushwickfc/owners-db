@@ -1,7 +1,7 @@
 # This module will take the data produced by handle_data and insert it into the db.
 import psycopg2
 import time
-import table_dicts
+import dicts
 import credentials # This file is gitignored - you'll need to provide your own copy
 
 # Divvy up the data for the data_dict-formatted owner (a row in master_date) to reflect the different tables we're inserting into...
@@ -12,29 +12,29 @@ def dict_to_tables(master_data):
     owner_owner_type_data = []
 
     for d in master_data:
-        owner_dict = dict(table_dicts.owner_dict, old_member_id=d['old_member_id'],
-                                                  pos_id=d['pos_id'],
-                                                  seven_shifts_id=d['seven_shifts_id'],
-                                                  email=d['email'],
-                                                  first_name=d['first_name'],
-                                                  last_name=d['last_name'],
-                                                  join_date=d['join_date'],
-                                                  phone=d['phone'],
-                                                  address=d['address'],
-                                                  city=d['city'],
-                                                  state=d['state'],
-                                                  zipcode=d['zipcode'],
-                                                  payment_plan_delinquent=d['payment_plan_delinquent'])
+        owner_dict = dict(dicts.owner_dict, old_member_id=d['old_member_id'],
+                                            pos_id=d['pos_id'],
+                                            seven_shifts_id=d['seven_shifts_id'],
+                                            email=d['email'],
+                                            first_name=d['first_name'],
+                                            last_name=d['last_name'],
+                                            join_date=d['join_date'],
+                                            phone=d['phone'],
+                                            address=d['address'],
+                                            city=d['city'],
+                                            state=d['state'],
+                                            zipcode=d['zipcode'],
+                                            payment_plan_delinquent=d['payment_plan_delinquent'])
         # In this import script, all hours logged are balance_carryovers...
         # and I assume that the hour_date would just be the date of the import.
-        hour_log_dict = dict(table_dicts.hour_log_dict, email=d['email'],
-                                                        amount=d['amount'],
-                                                        hour_reason='balance_carryover',
-                                                        hour_date=current_date)
+        hour_log_dict = dict(dicts.hour_log_dict, email=d['email'],
+                                                  amount=d['amount'],
+                                                  hour_reason='balance_carryover',
+                                                  hour_date=current_date)
         # In this case, I assume that start_date is the same as join_date.
-        owner_owner_type_dict = dict(table_dicts.owner_owner_type_dict, email=d['email'],
-                                                                        start_date=d['join_date'],
-                                                                        owner_type=d['owner_type'])
+        owner_owner_type_dict = dict(dicts.owner_owner_type_dict, email=d['email'],
+                                                                  start_date=d['join_date'],
+                                                                  owner_type=d['owner_type'])
 
         owner_data.append(owner_dict)
         hour_log_data.append(hour_log_dict)
@@ -89,9 +89,9 @@ def execute(master_data):
     owner_data, hour_log_data, owner_owner_type_data = dict_to_tables(master_data)
 
     # Using each table dict, turn the keys into cols and params
-    owner_cols, owner_params = cols_from_dict(table_dicts.owner_dict)
-    hour_log_cols, hour_log_params = cols_from_dict(table_dicts.hour_log_dict)
-    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(table_dicts.owner_owner_type_dict)
+    owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
+    hour_log_cols, hour_log_params = cols_from_dict(dicts.hour_log_dict)
+    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(dicts.owner_owner_type_dict)
 
     # Finally, put each set of data and its associated data for building the query into a list of dicts...
     data_query_dicts = [{'data': owner_data, 'cols': owner_cols, 'params': owner_params, 'table': 'owner'},

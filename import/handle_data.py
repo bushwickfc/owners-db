@@ -41,41 +41,44 @@ def convert_hours(hours):
     else:
         return float(hours)
 
-# Pull some important values out of each line of the master db and put them in a dict with the email as the key.
+# Pull some important values out of each line of the master db, put them
+# in a dict, and nest them in a parent dict with the email as the key.
 def process_master_db_data(master_db_raw_data):
     master_db_dict = {}
     for rd in master_db_raw_data:
         master_db_dict[normalize_email(rd[5])] = {'old_member_id': rd[0],
                                                   'pos_id': rd[1],
-                                                  'time_balance': convert_hours(rd[14])}
+                                                  'time_balance': rd[14]}
 
     return master_db_dict
 
 # Based on the attr argument, get the value from the dicts of master_db data.
+# If we're dealing with 'time_balance', make sure to zero out any negative or invalid values.
 def get_val_from_master_by_email(master_db_data, email, attr):
     default_val = float(0) if attr == 'time_balance' else None
-    return master_db_data[email][attr] if email in master_db_data and master_db_data[email][attr] != '' else default_val
+    return_val = master_db_data[email][attr] if email in master_db_data and master_db_data[email][attr] != '' else default_val
+    return convert_hours(return_val) if attr == 'time_balance' else return_val
 
-# From each row and the data_dict, create a dictionary for each owner
-def process_raw_data(owner, processed_master_db_data, data_dict):
+# From each row and the master_data_dict, create a dictionary for each owner
+def process_raw_data(owner, processed_master_db_data, master_data_dict):
     # Grab the email here, as it is also used as a reference key against the master_db data.
     email = normalize_email(owner[3])
 
-    return dict(data_dict, join_date=timestamp_to_date(owner[0]),
-                           pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
-                           first_name=owner[1],
-                           last_name=owner[2],
-                           email=email,
-                           phone=owner[4],
-                           address=format_address(owner[7], owner[8], owner[9]),
-                           city=owner[10],
-                           state=owner[11],
-                           zipcode=owner[12],
-                           amount=get_val_from_master_by_email(processed_master_db_data, email, 'time_balance'),
-                           owner_type=convert_owner_type(owner[14]),
-                           old_member_id=get_val_from_master_by_email(processed_master_db_data, email, 'old_member_id'))
+    return dict(master_data_dict, join_date=timestamp_to_date(owner[0]),
+                                  pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
+                                  first_name=owner[1],
+                                  last_name=owner[2],
+                                  email=email,
+                                  phone=owner[4],
+                                  address=format_address(owner[7], owner[8], owner[9]),
+                                  city=owner[10],
+                                  state=owner[11],
+                                  zipcode=owner[12],
+                                  amount=get_val_from_master_by_email(processed_master_db_data, email, 'time_balance'),
+                                  owner_type=convert_owner_type(owner[14]),
+                                  old_member_id=get_val_from_master_by_email(processed_master_db_data, email, 'old_member_id'))
 
-def execute(new_owner_raw_data, master_db_raw_data, data_dict):
+def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
     print('Processing raw data...')
     processed_master_db_data = process_master_db_data(master_db_raw_data)
-    return [process_raw_data(rd, processed_master_db_data, data_dict) for rd in new_owner_raw_data]
+    return [process_raw_data(rd, processed_master_db_data, master_data_dict) for rd in new_owner_raw_data]
