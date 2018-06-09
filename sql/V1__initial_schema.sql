@@ -1,4 +1,3 @@
-START TRANSACTION;
 create table owner_type (
   owner_type varchar(20) NOT NULL,
   display_name varchar(255) NOT NULL,
@@ -142,5 +141,3 @@ left join (select
     ' // Equity Susp.' as pos_display,
     FALSE as owner_price) pp
   on o.payment_plan_delinquent = TRUE;
-
-COMMIT;

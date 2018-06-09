@@ -4,7 +4,7 @@ import difflib
 
 # Lowercase email addresses and remove whitespace.
 def normalize_email(email):
-    return email.lower().replace(' ', '')
+    return email.lower().replace(' ', '').strip()
 
 # Convert a Google Sheet timestamp string ('5/1/2018 21:07:52') to basic date string format ('2018-5-1')
 def timestamp_to_date(ts):
