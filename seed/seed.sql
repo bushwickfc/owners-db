@@ -33,4 +33,17 @@ insert into hour_status(status, display_name, pos_display, owner_price,
 ('good_standing', 'Good Standing', ' // Active', true, 0, 2147483647),
 ('hours_alert', 'Hours Alert', ' // Hours Alert', true, -7, -1),
 ('hours_suspended', 'Hours Suspended', ' // Hours Susp.', false, -2147483648,
--8)
+-8);
+
+insert into equity_round(equity_round, display_name, description) VALUES
+('2018_initial', 'Initial 2018 equity round',
+'The first round of equity after the transition to the equity model in 2018');
+
+insert into equity_type(equity_round, equity_type, display_name,
+                        description, amount, payment_plan_amount) VALUES
+('2018_initial', 'full', 'Full Price', 'Full price equity share', 150.00,
+ 25.00),
+('2018_initial', 'legacy', 'Legacy', 'Discounted equity share', 100.00,
+ 25.00),
+('2018_initial', 'reduced', 'Reduced', 'Reduced equity share', 15.00,
+ 5.00);

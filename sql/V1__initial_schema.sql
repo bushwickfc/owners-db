@@ -80,6 +80,45 @@ create table hour_log (
   ON UPDATE CASCADE
 );
 
+create table equity_round (
+  equity_round varchar(20) NOT NULL,
+  display_name varchar(255) NOT NULL,
+  description varchar(255),
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(equity_round)
+);
+
+create table equity_type (
+  equity_round varchar(20) NOT NULL,
+  equity_type varchar(20) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  payment_plan_amount DECIMAL(10,2) NOT NULL,
+  display_name varchar(255) NOT NULL,
+  description varchar(255),
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(equity_type),
+  FOREIGN KEY(equity_round)
+  REFERENCES equity_round(equity_round)
+  ON UPDATE CASCADE
+);
+
+create table owner_equity_type (
+  email varchar(254) NOT NULL,
+  equity_type varchar(20) NOT NULL,
+  start_date date NOT NULL,
+  created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(email, equity_type),
+  FOREIGN KEY (email)
+  REFERENCES owner(email)
+  ON UPDATE CASCADE,
+  FOREIGN KEY(equity_type)
+  REFERENCES equity_type(equity_type)
+  ON UPDATE CASCADE
+);
+
 create table equity_log (
   email varchar(254) NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
@@ -117,6 +156,23 @@ select
     as owner_type
 from owner_owner_type;
 
+create view owner_equity as
+select *,
+  paid >= due as owner_price,
+  case when paid < due then ' // Equity Susp.'
+       else ''
+  end as pos_display
+  from
+  (select
+    oet.email,
+    sum(el.amount) as paid,
+    least((((CURRENT_DATE - oet.start_date) / 30) * et.payment_plan_amount),
+          et.amount) as due
+    from owner_equity_type oet
+    join equity_type et on oet.equity_type = oet.equity_type
+    join equity_log el on oet.email = el.email
+    group by oet.email, oet.start_date, et.payment_plan_amount, et.amount) as s;
+
 create view owner_view as
 select
   o.pos_id,
@@ -126,9 +182,10 @@ select
   o.email,
   o.first_name,
   o.last_name,
-  concat(o.first_name, ' ', o.last_name, s.pos_display, pp.pos_display) as pos_display,
+  concat(o.first_name, ' ', o.last_name, s.pos_display, oe.pos_display)
+    as pos_display,
   coalesce(h.balance, 0) as hour_balance,
-  (coalesce(pp.owner_price, TRUE) AND s.owner_price AND ot.owner_price)
+  (oe.owner_price AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o
 join current_owner_type cot on o.email = cot.email
@@ -137,7 +194,4 @@ left join hour_balance h on o.email = h.email
 join hour_status s on
   coalesce(h.balance, 0) >= s.minimum_balance
   and coalesce(h.balance, 0) <= s.maximum_balance
-left join (select
-    ' // Equity Susp.' as pos_display,
-    FALSE as owner_price) pp
-  on o.payment_plan_delinquent = TRUE;
+join owner_equity oe on o.email = oe.email;
