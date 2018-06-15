@@ -59,11 +59,15 @@ def get_val_from_master_by_email(master_db_data, email, attr):
     return_val = master_db_data[email][attr] if email in master_db_data and master_db_data[email][attr] != '' else default_val
     return convert_hours(return_val) if attr == 'time_balance' else return_val
 
+# Strip any leading or trailing whitespace from each value.
+def strip_whitespace(owner_prop):
+    return owner_prop.strip()
+
 # From each row and the master_data_dict, create a dictionary for each owner
 def process_raw_data(owner, processed_master_db_data, master_data_dict):
+    owner = [strip_whitespace(o) for o in owner]
     # Grab the email here, as it is also used as a reference key against the master_db data.
     email = normalize_email(owner[3])
-
     return dict(master_data_dict, join_date=timestamp_to_date(owner[0]),
                                   pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
                                   first_name=owner[1],
