@@ -166,8 +166,14 @@ select *,
   (select
     oet.email,
     sum(el.amount) as paid,
-    least((((CURRENT_DATE - oet.start_date) / 30) * et.payment_plan_amount),
-          et.amount) as due
+    /* owe an installment every month until we reach full amount */
+    least(
+      (((DATE_PART('year', CURRENT_DATE) -
+         DATE_PART('year', oet.start_date)) * 12
+         + (DATE_PART('month', CURRENT_DATE) -
+         DATE_PART('month', oet.start_date)))
+           * et.payment_plan_amount),
+      et.amount) as due
     from owner_equity_type oet
     join equity_type et on oet.equity_type = oet.equity_type
     join equity_log el on oet.email = el.email
