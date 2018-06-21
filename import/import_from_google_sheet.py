@@ -9,6 +9,8 @@ def fetch(sheet_name, worksheet_name, start):
     sheet = gc.open(sheet_name)
     # Get the specific worksheet from sheet.
     worksheet = sheet.worksheet_by_title(worksheet_name)
-    data = new_owner_worksheet.get_values(start=start, returnas='matrix')
+    data = worksheet.get_values(start=start,
+                                end=(worksheet.rows, worksheet.cols),
+                                returnas='matrix')
 
     return data

@@ -35,11 +35,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
     owner_parser = subparsers.add_parser('owner_import')
-    owner_parser.parse_args("--new_owner",
-                            help="new owner csv -
-                            downloaded from sheets if None")
-    owner_parser.parse_args("--master_sheet",
-                            help="master csv -
-                            downloaded from sheets if None")
+    owner_parser.add_argument("--new_owner",
+                              help="new owner csv - \
+                              downloaded from sheets if None")
+    owner_parser.add_argument("--master_sheet",
+                              help="master csv - \
+                              downloaded from sheets if None")
     owner_parser.set_defaults(func=owner_import)
-    parser.parse_args()
+    args = parser.parse_args()
+    args.func(args)
