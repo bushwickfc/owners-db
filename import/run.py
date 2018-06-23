@@ -3,6 +3,8 @@
 # The basic flow is that we pull data from a Google Sheet, do some reformatting/processing,
 # then insert that into the db.
 import argparse
+import csv
+
 import dicts
 import import_from_google_sheet
 import handle_data
@@ -15,21 +17,27 @@ def owner_import(args):
     if not new_owner_raw_data:
         new_owner_raw_data = import_from_google_sheet.fetch(
             'Copy of New Owner Onboarding',
-            'All New Owners',
-            # skip the header and test rows
-            (3,1))
+            'All New Owners')
+        # skip the test row
+    else:
+        with open(new_owner_raw_data) as f:
+            csv_reader = csv.DictReader(f)
+            new_owner_raw_data = list(csv_reader)
+    new_owner_raw_data = new_owner_raw_data[1:]
     if not master_db_raw_data:
         master_db_raw_data = import_from_google_sheet.fetch(
             'Copy of BFC Member Database (ACTIVE)',
-            'MASTER DB',
-            # skip the header
-            (2,1))
-
-    master_data = handle_data.execute(new_owner_raw_data,
-                                      master_db_raw_data,
-                                      dicts.master_data_dict)
-    insert.execute(master_data)
-    report.execute(master_data, dicts.master_data_dict)
+            'MASTER DB')
+    else:
+        with open(master_db_raw_data) as f:
+            csv_reader = csv.DictReader(f)
+            master_db_raw_data = list(csv_reader)
+    import pdb; pdb.set_trace()
+    #master_data = handle_data.execute(new_owner_raw_data,
+    #                                  master_db_raw_data,
+    #                                  dicts.master_data_dict)
+    #insert.execute(master_data)
+    #report.execute(master_data, dicts.master_data_dict)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

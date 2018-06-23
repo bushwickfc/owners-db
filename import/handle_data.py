@@ -2,6 +2,25 @@
 import time
 import difflib
 
+# new owners sheet
+FIRST_NAME = "First Name / Nombre"
+LAST_NAME = "Last Name / Apellido"
+EMAIL = "Email Address / Correo Electrónico"
+PHONE = "Phone Number / Teléfono"
+BUILDING = "Building Number / Número de Edificio"
+STREET = "Street / Calle"
+UNIT = "Unit Number / Número de unidad"
+CITY = "City / Ciudad"
+STATE = "State / Estado"
+ZIP = "Zip Code / Código Postal"
+O_TYPE = "Ownership Category / Categoría de Propietario"
+TIME = "Timestamp"
+
+# old members db
+OLD_ID = "MEMBER NUMBER"
+POS_ID = "POS ID"
+TIME_BALANCE = "TIME BALANCE"
+
 # Lowercase email addresses and remove whitespace.
 def normalize_email(email):
     return email.lower().replace(' ', '')
@@ -46,9 +65,9 @@ def convert_hours(hours):
 def process_master_db_data(master_db_raw_data):
     master_db_dict = {}
     for rd in master_db_raw_data:
-        master_db_dict[normalize_email(rd[5])] = {'old_member_id': rd[0],
-                                                  'pos_id': rd[1],
-                                                  'time_balance': rd[14]}
+        master_db_dict[normalize_email(rd["EMAIL ADDRESS"])] = {'old_member_id': rd[OLD_ID],
+                                                  'pos_id': rd[POS_ID],
+                                                  'time_balance': rd[TIME_BALANCE]}
 
     return master_db_dict
 
@@ -67,19 +86,19 @@ def strip_whitespace(owner_prop):
 def process_raw_data(owner, processed_master_db_data, master_data_dict):
     owner = [strip_whitespace(o) for o in owner]
     # Grab the email here, as it is also used as a reference key against the master_db data.
-    email = normalize_email(owner[3])
-    return dict(master_data_dict, join_date=timestamp_to_date(owner[0]),
+    email = normalize_email(owner[EMAIL])
+    return dict(master_data_dict, join_date=timestamp_to_date(owner[TIME]),
                                   pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
-                                  first_name=owner[1],
-                                  last_name=owner[2],
+                                  first_name=owner[FIRST_NAME],
+                                  last_name=owner[LAST_NAME],
                                   email=email,
-                                  phone=owner[4],
-                                  address=format_address(owner[7], owner[8], owner[9]),
-                                  city=owner[10],
-                                  state=owner[11],
-                                  zipcode=owner[12],
+                                  phone=owner[PHONE],
+                                  address=format_address(owner[BUILDING], owner[STREET], owner[UNIT]),
+                                  city=owner[CITY],
+                                  state=owner[STATE],
+                                  zipcode=owner[ZIP],
                                   amount=get_val_from_master_by_email(processed_master_db_data, email, 'time_balance'),
-                                  owner_type=convert_owner_type(owner[14]),
+                                  owner_type=convert_owner_type(owner[O_TYPE]),
                                   old_member_id=get_val_from_master_by_email(processed_master_db_data, email, 'old_member_id'))
 
 def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
