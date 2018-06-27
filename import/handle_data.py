@@ -1,5 +1,5 @@
 # This module will ingest the data from Google Sheets, do some processing, and format it as a list of dicts.
-import time
+from datetime import datetime
 import difflib
 
 # new owners sheet
@@ -25,10 +25,11 @@ TIME_BALANCE = "TIME BALANCE"
 def normalize_email(email):
     return email.lower().replace(' ', '')
 
-# Convert a Google Sheet timestamp string ('5/1/2018 21:07:52') to basic date string format ('2018-5-1')
+# Convert a Google Sheet timestamp string ('5/1/2018 21:07:52') to
+# basic date string format ('2018-5-1')
 def timestamp_to_date(ts):
-    dt_tup = time.strptime(ts, '%m/%d/%Y %H:%M:%S')
-    return str(dt_tup[0]) + '-' + str(dt_tup[1]) + '-' + str(dt_tup[2])
+    dt = datetime.strptime(ts, '%m/%d/%Y %H:%M:%S')
+    return dt.date()
 
 # Clean up the building/street/unit number fields so we have a cohesive address.
 def format_address(building, street, unit):
@@ -84,8 +85,9 @@ def strip_whitespace(owner_prop):
 
 # From each row and the master_data_dict, create a dictionary for each owner
 def process_raw_data(owner, processed_master_db_data, master_data_dict):
-    owner = [strip_whitespace(o) for o in owner]
-    # Grab the email here, as it is also used as a reference key against the master_db data.
+    owner = {k: strip_whitespace(v) for k, v in owner.items()}
+    # Grab the email here, as it is also used as a reference key
+    # against the master_db data.
     email = normalize_email(owner[EMAIL])
     return dict(master_data_dict, join_date=timestamp_to_date(owner[TIME]),
                                   pos_id=get_val_from_master_by_email(processed_master_db_data, email, 'pos_id'),
@@ -104,4 +106,5 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
 def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
     print('Processing raw data...')
     processed_master_db_data = process_master_db_data(master_db_raw_data)
-    return [process_raw_data(rd, processed_master_db_data, master_data_dict) for rd in new_owner_raw_data]
+    return [process_raw_data(rd, processed_master_db_data, master_data_dict)
+            for rd in new_owner_raw_data]

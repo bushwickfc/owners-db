@@ -32,11 +32,10 @@ def owner_import(args):
         with open(master_db_raw_data) as f:
             csv_reader = csv.DictReader(f)
             master_db_raw_data = list(csv_reader)
-    import pdb; pdb.set_trace()
-    #master_data = handle_data.execute(new_owner_raw_data,
-    #                                  master_db_raw_data,
-    #                                  dicts.master_data_dict)
-    #insert.execute(master_data)
+    master_data = handle_data.execute(new_owner_raw_data,
+                                      master_db_raw_data,
+                                      dicts.master_data_dict)
+    insert.execute(master_data)
     #report.execute(master_data, dicts.master_data_dict)
 
 if __name__ == '__main__':
