@@ -3,8 +3,6 @@
 import psycopg2
 import time
 import dicts
-# This file is gitignored - you'll need to provide your own copy
-import credentials
 
 # Divvy up the data for the data_dict-formatted owner (a row in
 # master_date) to reflect the different tables we're inserting into...
@@ -88,7 +86,6 @@ def bulk_insert(connection, data_query_dicts):
 
     connection.commit()
     cursor.close()
-    connection.close()
 
 def last_update(conn):
     query = 'select max(join_date) from owner'
@@ -98,34 +95,33 @@ def last_update(conn):
 
 def execute(master_data):
     print('Inserting data into database...')
-    connection = psycopg2.connect(f'''host={credentials.host}
-                                      user={credentials.user}
-                                      password={credentials.password}
-                                      dbname={credentials.dbname}''')
+    with util.connection() as connection:
 
-    last_ingest = last_update(connection)
-    # >= in case someone joins later in the day that we ran the ingest
-    master_data = [d for d in master_data if d['join_date'] => last_ingest]
+        last_ingest = last_update(connection)
+        # >= in case someone joins later in the day that we ran the ingest
+        master_data = [d for d in master_data if d['join_date'] >= last_ingest]
 
-    # Split up each owner's master_data into set of related table data
-    # to be inserted
-    owner_data, hour_log_data, owner_owner_type_data = \
-        dict_to_tables(master_data)
+        # Split up each owner's master_data into set of related table data
+        # to be inserted
+        owner_data, hour_log_data, owner_owner_type_data = \
+            dict_to_tables(master_data)
 
-    # Using each table dict, turn the keys into cols and params
-    owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
-    hour_log_cols, hour_log_params = cols_from_dict(dicts.hour_log_dict)
-    owner_owner_type_cols, owner_owner_type_params = cols_from_dict(dicts.owner_owner_type_dict)
+        # Using each table dict, turn the keys into cols and params
+        owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
+        hour_log_cols, hour_log_params = cols_from_dict(dicts.hour_log_dict)
+        owner_owner_type_cols, owner_owner_type_params = cols_from_dict(dicts.owner_owner_type_dict)
 
-    # Finally, put each set of data and its associated data for
-    # building the query into a list of dicts...
-    data_query_dicts = [{'data': owner_data, 'cols':
-                         owner_cols, 'params': owner_params, 'table': 'owner'},
-                        {'data': hour_log_data, 'cols': hour_log_cols,
-                         'params': hour_log_params, 'table': 'hour_log'},
-                        {'data': owner_owner_type_data,
-                         'cols': owner_owner_type_cols,
-                         'params': owner_owner_type_params,
-                         'table': 'owner_owner_type'}]
+        # Finally, put each set of data and its associated data for
+        # building the query into a list of dicts...
+        data_query_dicts = [
+            {'data': owner_data, 'cols':
+             owner_cols, 'params': owner_params,
+             'table': 'owner'},
+            {'data': hour_log_data, 'cols': hour_log_cols,
+             'params': hour_log_params, 'table': 'hour_log'},
+            {'data': owner_owner_type_data,
+             'cols': owner_owner_type_cols,
+             'params': owner_owner_type_params,
+             'table': 'owner_owner_type'}]
 
-    bulk_insert(connection, data_query_dicts)
+        bulk_insert(connection, data_query_dicts)
