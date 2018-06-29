@@ -11,6 +11,7 @@ import handle_data
 import insert
 import report
 import equity_ingest
+import util
 
 def owner_import(args):
     new_owner_csv = args.new_owner
@@ -53,7 +54,10 @@ def equity_import(args):
     equity_types = [equity_ingest.owner_equity_type(r) for r in equity_types]
     equity_payments = [equity_ingest.owner_equity_payment(r)
                        for r in equity_payments]
-    import pdb; pdb.set_trace()
+
+    with util.connection() as conn:
+        equity_ingest.insert_equity_type(conn, equity_types)
+        equity_ingest.insert_payment(conn, equity_payments)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

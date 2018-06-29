@@ -1,4 +1,5 @@
 from datetime import datetime
+import psycopg2
 
 # This file is gitignored - you'll need to provide your own copy
 import credentials
@@ -12,6 +13,14 @@ def normalize_email(email):
 def timestamp_to_date(ts):
     dt = datetime.strptime(ts, '%m/%d/%Y %H:%M:%S')
     return dt.date()
+
+def dedupe(seq, selector=None):
+    seen = set()
+    seen_add = seen.add
+    if not selector:
+        selector = lambda x: x
+    return [x for x in seq
+            if not (selector(x) in seen or seen_add(selector(x)))]
 
 def connection():
     return psycopg2.connect(f'''host={credentials.host}

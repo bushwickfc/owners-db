@@ -3,6 +3,7 @@
 import psycopg2
 import time
 import dicts
+import util
 
 # Divvy up the data for the data_dict-formatted owner (a row in
 # master_date) to reflect the different tables we're inserting into...
@@ -84,9 +85,6 @@ def bulk_insert(connection, data_query_dicts):
                         print(f'- success: inserted record for {email} \
                         into table {table}')
 
-    connection.commit()
-    cursor.close()
-
 def last_update(conn):
     query = 'select max(join_date) from owner'
     with conn.cursor() as cursor:
@@ -99,12 +97,14 @@ def execute(master_data):
 
         last_ingest = last_update(connection)
         # >= in case someone joins later in the day that we ran the ingest
-        master_data = [d for d in master_data if d['join_date'] >= last_ingest]
+        master_data = [d for d in master_data
+                       if (not last_ingest) or d['join_date'] >= last_ingest]
 
         # Split up each owner's master_data into set of related table data
         # to be inserted
         owner_data, hour_log_data, owner_owner_type_data = \
             dict_to_tables(master_data)
+        hour_log_data = [h for h in hour_log_data if h['amount'] > 0]
 
         # Using each table dict, turn the keys into cols and params
         owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
