@@ -104,7 +104,6 @@ def execute(master_data):
         # to be inserted
         owner_data, hour_log_data, owner_owner_type_data = \
             dict_to_tables(master_data)
-        hour_log_data = [h for h in hour_log_data if h['amount'] > 0]
 
         # Using each table dict, turn the keys into cols and params
         owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
