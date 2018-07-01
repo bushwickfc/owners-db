@@ -175,7 +175,7 @@ select *,
            * et.payment_plan_amount),
       et.amount) as due
     from owner_equity_type oet
-    join equity_type et on oet.equity_type = oet.equity_type
+    join equity_type et on oet.equity_type = et.equity_type
     join equity_log el on oet.email = el.email
     group by oet.email, oet.start_date, et.payment_plan_amount, et.amount) as s;
 
@@ -191,6 +191,8 @@ select
   concat(o.first_name, ' ', o.last_name, s.pos_display, oe.pos_display)
     as pos_display,
   coalesce(h.balance, 0) as hour_balance,
+  oe.paid as equity_paid,
+  oe.due as equity_due,
   (oe.owner_price AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o

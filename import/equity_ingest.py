@@ -39,13 +39,16 @@ def insert_equity_type(conn, equity_types):
     existing_equity = existing(conn, "owner_equity_type")
     owners = existing(conn, 'owner')
     equity_types = util.dedupe(equity_types, lambda x: x['email'])
-    equity_types = [e for e in equity_types
-                    if e['email'] not in existing_equity
-                    and e['email'] in owners]
+    equity_types_new = [e for e in equity_types
+                        if e['email'] not in existing_equity]
+    equity_types_ins = [e for e in equity_types_new
+                        if e['email'] in owners]
     query = """insert into owner_equity_type(email, equity_type, start_date) \
                values (%(email)s, %(equity_type)s, %(start_date)s)"""
     with conn.cursor() as cursor:
-        cursor.executemany(query, equity_types)
+        cursor.executemany(query, equity_types_ins)
+    inserted = set([e['email'] for e in equity_types_ins])
+    return [e for e in equity_types_new if e['email'] not in inserted]
 
 def last_update(conn):
     query = 'select max(transaction_date) from equity_log'
@@ -56,10 +59,13 @@ def last_update(conn):
 def insert_payment(conn, equity_payments):
     last = last_update(conn)
     owners = existing(conn, 'owner')
-    equity_payments = [p for p in equity_payments
-                       if p['email'] in owners
-                       and ((not last) or p['transaction_date'] > last)]
+    equity_payments_new = [p for p in equity_payments if
+                           (not last) or p['transaction_date'] > last]
+    equity_payments_ins = [p for p in equity_payments_new
+                           if p['email'] in owners]
     query = """insert into equity_log(email, amount, transaction_date) \
                values (%(email)s, %(amount)s, %(transaction_date)s)"""
     with conn.cursor() as cursor:
-        cursor.executemany(query, equity_payments)
+        cursor.executemany(query, equity_payments_ins)
+    inserted = set([p['email'] for p in equity_payments_ins])
+    return [p for p in equity_payments_new if p['email'] not in inserted]

@@ -38,7 +38,7 @@ def owner_import(args):
                                       master_db_raw_data,
                                       dicts.master_data_dict)
     insert.execute(master_data)
-    #report.execute(master_data, dicts.master_data_dict)
+    report.execute(master_data, dicts.master_data_dict)
 
 def equity_import(args):
     equity_csv = args.equity_payments
@@ -56,8 +56,22 @@ def equity_import(args):
                        for r in equity_payments]
 
     with util.connection() as conn:
-        equity_ingest.insert_equity_type(conn, equity_types)
-        equity_ingest.insert_payment(conn, equity_payments)
+        et_review = equity_ingest.insert_equity_type(conn, equity_types)
+        ep_review = equity_ingest.insert_payment(conn, equity_payments)
+    if et_review:
+        print("Some equity types not inserted")
+        with open('equity_type_review.csv', 'w', newline='') as f:
+            fieldnames = list(et_review[0].keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(et_review)
+    if ep_review:
+        print("Some equity payments not inserted")
+        with open('equity_payment_review.csv', 'w', newline='') as f:
+            fieldnames = list(ep_review[0].keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(ep_review)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
