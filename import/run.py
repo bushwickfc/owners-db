@@ -4,6 +4,7 @@
 # then insert that into the db.
 import argparse
 import csv
+from datetime import date
 
 import dicts
 import import_from_google_sheet
@@ -12,6 +13,8 @@ import insert
 import report
 import equity_ingest
 import util
+import seven_shifts
+import meeting
 
 def owner_import(args):
     new_owner_csv = args.new_owner
@@ -20,11 +23,11 @@ def owner_import(args):
         new_owner_raw_data = import_from_google_sheet.fetch(
             'Copy of New Owner Onboarding',
             'All New Owners')
-        # skip the test row
     else:
         with open(new_owner_csv) as f:
             csv_reader = csv.DictReader(f)
             new_owner_raw_data = list(csv_reader)
+    # skip the test row
     new_owner_raw_data = new_owner_raw_data[1:]
     if not master_db_csv:
         master_db_raw_data = import_from_google_sheet.fetch(
@@ -58,39 +61,63 @@ def equity_import(args):
     with util.connection() as conn:
         et_review = equity_ingest.insert_equity_type(conn, equity_types)
         ep_review = equity_ingest.insert_payment(conn, equity_payments)
-    if et_review:
-        print("Some equity types not inserted")
-        with open('equity_type_review.csv', 'w', newline='') as f:
-            fieldnames = list(et_review[0].keys())
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(et_review)
-    if ep_review:
-        print("Some equity payments not inserted")
-        with open('equity_payment_review.csv', 'w', newline='') as f:
-            fieldnames = list(ep_review[0].keys())
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(ep_review)
+    util.write_review_file(et_review, 'equity_type', 'equity types')
+    util.write_review_file(ep_review, 'equity_payment', 'equity payments')
+
+def seven_shifts_import(args):
+    start_date, end_date = args.start_date, args.end_date
+    with util.connection() as conn:
+        if not start_date:
+            last = seven_shifts.last_update(conn)
+            # if we have no shift data, this is where the old db stops
+            start_date = last or '2018-06-01'
+        if not end_date:
+            end_date = date.today().isoformat()
+        responses = seven_shifts.fetch_shifts(start_date, end_date)
+        user_shifts = [seven_shifts.transform(r) for r in responses]
+        ss_review = seven_shifts.insert(conn, user_shifts)
+    util.write_review_file(ss_review, 'shift_data', 'shift data')
+
+def meeting_import(args):
+    with open(args.attendance_csv) as f:
+        csv_reader = csv.DictReader(f)
+        meeting_csv = list(csv_reader)
+    # need to check cell because there is a blank line at the beginning of
+    # the file
+    meeting_attendance = [meeting.transform(m) for m in meeting_csv
+                          if m['Timestamp']]
+    with util.connection() as conn:
+        m_review = meeting.import_meeting(conn, meeting_attendance)
+    util.write_review_file(m_review, 'meeting_attendance',
+                           'meeting attendance entries')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    owner_parser = subparsers.add_parser('owner_import')
-    owner_parser.add_argument("--new_owner",
+    owner_parser = subparsers.add_parser('owner-import')
+    owner_parser.add_argument("--new-owner",
                               help="new owner csv - \
                               downloaded from sheets if None")
-    owner_parser.add_argument("--master_sheet",
+    owner_parser.add_argument("--master-sheet",
                               help="master csv - \
                               downloaded from sheets if None")
     owner_parser.set_defaults(func=owner_import)
 
-    equity_parser = subparsers.add_parser('equity_import')
-    equity_parser.add_argument("--equity_payments",
+    equity_parser = subparsers.add_parser('equity-import')
+    equity_parser.add_argument("--equity-payments",
                                help="equity payment csv")
-    equity_parser.add_argument("--payment_agreement",
+    equity_parser.add_argument("--payment-agreement",
                                help="payment plan agreement")
     equity_parser.set_defaults(func=equity_import)
+
+    shifts_parser = subparsers.add_parser('seven-shifts')
+    shifts_parser.add_argument("--start-date")
+    shifts_parser.add_argument("--end-date")
+    shifts_parser.set_defaults(func=seven_shifts_import)
+
+    meeting_parser = subparsers.add_parser('meeting-attendance')
+    meeting_parser.add_argument("attendance_csv")
+    meeting_parser.set_defaults(func=meeting_import)
 
     args = parser.parse_args()
     args.func(args)

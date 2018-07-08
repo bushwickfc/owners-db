@@ -1,13 +1,13 @@
-insert into owner_type(owner_type, display_name, work_requirement,
+insert into owner_type(owner_type, display_name, pos_display, work_requirement,
                        work_surrogate, shopping_surrogate, owner_price) VALUES
-('standard', 'Standard', 3, 0, 0, true),
-('senior', 'Senior', 2, 1, 1, true),
-('parental', 'Parent/Guardian', 2, 1, 1, true),
-('disability','Disabled/Injured', 0, 0, 1, true),
-('pregnancy', 'Pregnancy', 0, 0, 1, true),
-('family_leave', 'Family Leave', 0, 0, 1, true),
-('hold', 'Hold', 0, 0, 0, false),
-('inactive', 'Inactive', 0, 0, 0, false);
+('standard', 'Standard', '', 3, 0, 0, true),
+('senior', 'Senior', ' // S', 2, 1, 1, true),
+('parental', 'Parent/Guardian', ' // PG', 2, 1, 1, true),
+('disability','Disabled/Injured', ' // DI', 0, 0, 1, true),
+('pregnancy', 'Pregnancy', 'P', 0, 0, 1, true),
+('family_leave', 'Family Leave', ' // FL', 0, 0, 1, true),
+('hold', 'Hold', ' // H', 0, 0, 0, false),
+('inactive', 'Inactive', ' // I', 0, 0, 0, false);
 
 insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('shift', 'Store Shift', 'In store shift'),
@@ -26,13 +26,14 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('balance_carryover', 'Balance Carryover',
  'Balance carried over from previous database'),
 ('penalty', 'Penalty', 'Missed shift penalty'),
-('monthly_requirement','Monthly Requirement','Monthly work requirement');
+('monthly_requirement','Monthly Requirement','Monthly work requirement'),
+('meeting', 'Monthly coop meeting', 'Monthly coop wide committees meeeting');
 
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
-('good_standing', 'Good Standing', ' // Active', true, 0, 2147483647),
-('hours_alert', 'Hours Alert', ' // Hours Alert', true, -7, -1),
-('hours_suspended', 'Hours Suspended', ' // Hours Susp.', false, -2147483648,
+('good_standing', 'Good Standing', 'Active', true, 0, 2147483647),
+('hours_alert', 'Hours Alert', 'Hours Alert', true, -7, -1),
+('hours_suspended', 'Hours Suspended', 'Hours Susp.', false, -2147483648,
 -8);
 
 insert into equity_round(equity_round, display_name, description) VALUES

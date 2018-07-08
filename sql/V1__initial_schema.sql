@@ -1,6 +1,7 @@
 create table owner_type (
   owner_type varchar(20) NOT NULL,
   display_name varchar(255) NOT NULL,
+  pos_display varchar(10) NOT NULL,
   description varchar(255),
   work_requirement int NOT NULL,
   work_surrogate int NOT NULL,
@@ -159,9 +160,9 @@ from owner_owner_type;
 create view owner_equity as
 select *,
   paid >= due as owner_price,
-  case when paid < due then ' // Equity Susp.'
+  case when paid < due then concat(' // ', paid - due)
        else ''
-  end as pos_display
+  end  as pos_display
   from
   (select
     oet.email,
@@ -174,7 +175,20 @@ select *,
          DATE_PART('month', oet.start_date)))
            * et.payment_plan_amount),
       et.amount) as due
-    from owner_equity_type oet
+    from (
+      /* legacy payment plans get an extra month to repay since they don't
+       have to pay a fee */
+      select email,
+      equity_type,
+      start_date - interval '1 month' as start_date
+      from owner_equity_type
+      where equity_type='legacy'
+      union
+      select email,
+      equity_type,
+      start_date
+      from owner_equity_type
+      where equity_type != 'legacy') oet
     join equity_type et on oet.equity_type = et.equity_type
     join equity_log el on oet.email = el.email
     group by oet.email, oet.start_date, et.payment_plan_amount, et.amount) as s;
@@ -184,15 +198,27 @@ select
   o.pos_id,
   ot.owner_type,
   ot.display_name as owner_type_name,
-  s.status,
   o.email,
   o.first_name,
   o.last_name,
-  concat(o.first_name, ' ', o.last_name, s.pos_display, oe.pos_display)
+  /* Name */
+  concat(o.first_name, ' ', o.last_name,
+  ' // ',
+  /* Status code */
+  (NOT (oe.owner_price AND s.owner_price AND ot.owner_price))::int + 1,
+  ' // ',
+  /* Hour balance */
+  coalesce(h.balance, 0),
+  /* Owner type code */
+  ot.pos_display,
+  /* Equity owed (if relevant) */
+  oe.pos_display)
     as pos_display,
   coalesce(h.balance, 0) as hour_balance,
   oe.paid as equity_paid,
   oe.due as equity_due,
+  oe.owner_price as equity_current,
+  s.owner_price as hours_current,
   (oe.owner_price AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o

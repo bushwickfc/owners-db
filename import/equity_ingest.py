@@ -29,15 +29,9 @@ def owner_equity_payment(row):
         'transaction_date': datetime.strptime(row['date'], '%Y-%m-%d').date(),
         'amount': row['TOTAL'] }
 
-def existing(conn, table):
-    query = "select distinct email from {}".format(table)
-    with conn.cursor() as cursor:
-        cursor.execute(query)
-        return set([util.normalize_email(e[0]) for e in cursor.fetchall()])
-
 def insert_equity_type(conn, equity_types):
-    existing_equity = existing(conn, "owner_equity_type")
-    owners = existing(conn, 'owner')
+    existing_equity = util.existing(conn, "owner_equity_type")
+    owners = util.existing(conn, 'owner')
     equity_types = util.dedupe(equity_types, lambda x: x['email'])
     equity_types_new = [e for e in equity_types
                         if e['email'] not in existing_equity]
@@ -58,14 +52,15 @@ def last_update(conn):
 
 def insert_payment(conn, equity_payments):
     last = last_update(conn)
-    owners = existing(conn, 'owner')
+    owners = util.existing(conn, 'owner')
     equity_payments_new = [p for p in equity_payments if
                            (not last) or p['transaction_date'] > last]
     equity_payments_ins = [p for p in equity_payments_new
                            if p['email'] in owners]
+    equity_payments_not_ins = [p for p in equity_payments_new
+                               if p['email'] not in owners]
     query = """insert into equity_log(email, amount, transaction_date) \
                values (%(email)s, %(amount)s, %(transaction_date)s)"""
     with conn.cursor() as cursor:
         cursor.executemany(query, equity_payments_ins)
-    inserted = set([p['email'] for p in equity_payments_ins])
-    return [p for p in equity_payments_new if p['email'] not in inserted]
+    return equity_payments_not_ins
