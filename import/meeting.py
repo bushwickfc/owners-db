@@ -12,7 +12,7 @@ def transform(log):
              'first_name': log['First Name'],
              'last_name': log['Last Name'],
              'timestamp': log['Timestamp'],
-             'date': util.timestamp_to_date(log['Timestamp'])}
+             'date': util.parse_gs_timestamp(log['Timestamp'])}
 
 def import_meeting(conn, meeting_attendance):
     last = last_update(conn)

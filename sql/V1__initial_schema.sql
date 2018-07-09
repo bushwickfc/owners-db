@@ -24,7 +24,7 @@ create table owner (
   address text,
   city text,
   state text,
-  zipcode varchar(9),
+  zipcode varchar(10),
   payment_plan_delinquent boolean,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP,

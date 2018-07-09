@@ -16,7 +16,7 @@ def owner_equity_type(row):
     return {
         'email': util.normalize_email(
             row['Email Address / Correo Electrónico']),
-        'start_date': util.timestamp_to_date(row['Timestamp']),
+        'start_date': util.parse_gs_timestamp(row['Timestamp']),
         'equity_type': equity_owed_to_type(
             row['Equity Investment / Inversión de Capital']),
         'name': ' '.join([row['First Name / Nombre'],

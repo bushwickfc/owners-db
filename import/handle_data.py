@@ -87,28 +87,29 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
     # Grab the email here, as it is also used as a reference key
     # against the master_db data.
     email = util.normalize_email(owner[EMAIL])
-    return dict(master_data_dict, join_date=util.timestamp_to_date(owner[TIME]),
-                                  pos_id=get_val_from_master_by_email(
-                                      processed_master_db_data,
-                                      email,
-                                      'pos_id'),
-                                  first_name=owner[FIRST_NAME],
-                                  last_name=owner[LAST_NAME],
-                                  email=email,
-                                  phone=owner[PHONE],
-                                  address=format_address(owner[BUILDING],
-                                                         owner[STREET],
-                                                         owner[UNIT]),
-                                  city=owner[CITY],
-                                  state=owner[STATE],
-                                  zipcode=owner[ZIP],
-                                  amount=get_val_from_master_by_email(
-                                      processed_master_db_data,
-                                      email, 'time_balance'),
-                                  owner_type=convert_owner_type(owner[O_TYPE]),
-                                  old_member_id=get_val_from_master_by_email(
-                                      processed_master_db_data,
-                                      email, 'old_member_id'))
+    return dict(master_data_dict,
+                join_date=util.parse_gs_timestamp(owner[TIME]),
+                pos_id=get_val_from_master_by_email(
+                    processed_master_db_data,
+                    email,
+                    'pos_id'),
+                first_name=owner[FIRST_NAME],
+                last_name=owner[LAST_NAME],
+                email=email,
+                phone=owner[PHONE],
+                address=format_address(owner[BUILDING],
+                                       owner[STREET],
+                                       owner[UNIT]),
+                city=owner[CITY],
+                state=owner[STATE],
+                zipcode=owner[ZIP],
+                amount=get_val_from_master_by_email(
+                    processed_master_db_data,
+                    email, 'time_balance'),
+                owner_type=convert_owner_type(owner[O_TYPE]),
+                old_member_id=get_val_from_master_by_email(
+                    processed_master_db_data,
+                    email, 'old_member_id'))
 
 def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
     print('Processing raw data...')
