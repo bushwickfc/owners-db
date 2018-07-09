@@ -4,4 +4,5 @@ import/*.csv
 import/__pycache__/
 import/credentials.py
 no_old_member_id.csv
+all_import_local.sh
 *.pyc

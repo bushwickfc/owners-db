@@ -22,7 +22,7 @@ def import_meeting(conn, meeting_attendance):
     log_ins = [l for l in log_new if l['email'] in owners]
     log_not_ins = [l for l in log_new if l['email'] in owners]
     # meetings are 2 hours
-    query = """insert into hour_log(email, amount, hour_date, reason) \
+    query = """insert into hour_log(email, amount, hour_date, hour_reason) \
                values (%(email)s, 2, %(date)s, 'meeting')"""
     with conn.cursor() as cursor:
         cursor.executemany(query, log_ins)
