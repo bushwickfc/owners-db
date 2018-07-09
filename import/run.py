@@ -93,7 +93,8 @@ def meeting_import(args):
                            'meeting attendance entries')
 
 def committee_import(args):
-    committee.fetch_committee_sheets()
+    with util.connection() as conn:
+        committee.import_committee(conn)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

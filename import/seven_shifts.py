@@ -8,10 +8,6 @@ import util
 SHIFTS_URL = "https://api.7shifts.com/v1/shifts"
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
-MANAGERS = ["fran@bushwickfoodcoop.org",
-            "laurel@bushwickfoodcoop.org",
-            ""]
-
 def fetch_shifts(start_date, end_date):
     returned = None
     offset = 0
@@ -39,6 +35,7 @@ def fetch_shifts(start_date, end_date):
 def transform(resp_obj):
     user = resp_obj['user']
     shift = resp_obj['shift']
+    role = resp_obj['role']
     start = datetime.strptime(shift['start'], TIME_FMT)
     end = datetime.strptime(shift['end'], TIME_FMT)
     hours = (end - start).total_seconds() / 3600
@@ -48,12 +45,15 @@ def transform(resp_obj):
             'lastname': user['lastname'],
             'shift_start': start,
             'shift_end': end,
-            'hours': hours}
+            'hours': hours,
+            'role': role['name'].lower()}
 
-def insert(conn, user_shifts):
+def insert(conn, shifts):
     owners = util.existing(conn, 'owner')
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
              values (%(email)s, %(hours)s, %(shift_start)s, 'shift')"""
+    user_shifts = [s for s in shifts if 'manager' not in s['role']]
+    print('Manager shifts excluded: {}'.format(len(shifts) - len(user_shifts)))
     user_shifts_ins = [s for s in user_shifts if
                        s['email'] in owners]
     user_shifts_not_ins = [s for s in user_shifts if

@@ -2,9 +2,9 @@ import pygsheets
 
 import util
 
-SHEET_TITLE = 'Committee Work Hours Tracking (2018)'
+SHEET_TITLE = 'Copy of Committee Work Hours Tracking (2018)'
 
-def commitee_title(sheet_title):
+def committee_title(sheet_title):
     if sheet_title == 'Board of Directors':
         return 'board'
     else:
@@ -15,7 +15,11 @@ def fetch_committee_sheets():
     sheet = gc.open(SHEET_TITLE)
     # ignore first sheet which contains all responses
     # the filtered sheets contain approvals
-    worksheets = sheet.worksheets()[1:]
+    return sheet.worksheets()[1:]
+
+def import_committee(conn):
+    sheets = fetch_committee_sheets()
+    import_sheet(conn, sheets[0])
 
 def transform(row):
     return { 'email': util.normalize_email(row['Email Address']),
@@ -29,4 +33,4 @@ def transform(row):
 
 def import_sheet(conn, sheet):
     committee = committee_title(sheet.title)
-    
+    import pdb; pdb.set_trace()
