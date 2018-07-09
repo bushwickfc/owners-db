@@ -15,6 +15,7 @@ import equity_ingest
 import util
 import seven_shifts
 import meeting
+import committee
 
 def owner_import(args):
     new_owner_csv = args.new_owner
@@ -68,7 +69,7 @@ def seven_shifts_import(args):
     start_date, end_date = args.start_date, args.end_date
     with util.connection() as conn:
         if not start_date:
-            last = seven_shifts.last_update(conn)
+            last = util.last_hour_update(conn, 'shift')
             # if we have no shift data, this is where the old db stops
             start_date = last or '2018-06-01'
         if not end_date:
@@ -90,6 +91,9 @@ def meeting_import(args):
         m_review = meeting.import_meeting(conn, meeting_attendance)
     util.write_review_file(m_review, 'meeting_attendance',
                            'meeting attendance entries')
+
+def committee_import(args):
+    committee.fetch_committee_sheets()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -118,6 +122,9 @@ if __name__ == '__main__':
     meeting_parser = subparsers.add_parser('meeting-attendance')
     meeting_parser.add_argument("attendance_csv")
     meeting_parser.set_defaults(func=meeting_import)
+
+    committee_parser = subparsers.add_parser('committee')
+    committee_parser.set_defaults(func=committee_import)
 
     args = parser.parse_args()
     args.func(args)

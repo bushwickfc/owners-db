@@ -14,7 +14,7 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('other', 'Other',
  'If this is being used a lot, a new category should probably be created'),
 ('technology', 'Technology Committee', ''),
-('membership', 'Membership Committee', ''),
+('ownership', 'Ownership Committee', ''),
 ('sourcing', 'Sourcing Committee', ''),
 ('facilities', 'Facilities Committee', ''),
 ('finance', 'Finance Committee', ''),

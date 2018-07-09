@@ -36,6 +36,13 @@ def existing(conn, table):
         cursor.execute(query)
         return set([normalize_email(e[0]) for e in cursor.fetchall()])
 
+def last_hour_update(conn, reason):
+    query = "select max(hour_date) from hour_log where \
+                  hour_reason = '{}'".format(reason)
+    with conn.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchone()[0]
+
 def write_review_file(to_review, review_type, hum_name):
     if to_review:
         print("Some {} not inserted".format(hum_name))

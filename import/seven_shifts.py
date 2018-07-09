@@ -50,13 +50,6 @@ def transform(resp_obj):
             'shift_end': end,
             'hours': hours}
 
-def last_update(conn):
-    query = "select max(hour_date) from hour_log where \
-                  hour_reason = 'shift'"
-    with conn.cursor() as cursor:
-        cursor.execute(query)
-        return cursor.fetchone()[0]
-
 def insert(conn, user_shifts):
     owners = util.existing(conn, 'owner')
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
