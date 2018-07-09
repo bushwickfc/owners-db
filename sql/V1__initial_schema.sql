@@ -69,7 +69,7 @@ create table hour_log (
   email varchar(254) NOT NULL,
   amount int NOT NULL,
   hour_reason varchar(20) NOT NULL,
-  hour_date date NOT NULL,
+  hour_date timestamp NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(email, hour_reason, hour_date),
