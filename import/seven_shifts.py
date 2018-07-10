@@ -46,13 +46,13 @@ def transform(resp_obj):
             'shift_start': start,
             'shift_end': end,
             'hours': hours,
-            'role': role['name'].lower()}
+            'role': role.get('name') or ''}
 
 def insert(conn, shifts):
     owners = util.existing(conn, 'owner')
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
              values (%(email)s, %(hours)s, %(shift_start)s, 'shift')"""
-    user_shifts = [s for s in shifts if 'manager' not in s['role']]
+    user_shifts = [s for s in shifts if 'Manager' not in s['role']]
     print('Manager shifts excluded: {}'.format(len(shifts) - len(user_shifts)))
     user_shifts_ins = [s for s in user_shifts if
                        s['email'] in owners]

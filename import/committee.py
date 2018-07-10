@@ -7,7 +7,7 @@ import util
 SHEET_TITLE = 'Copy of Committee Work Hours Tracking (2018)'
 
 MONTH_MAP = {'January': 1,
-             'Feburary': 2,
+             'February': 2,
              'March': 3,
              'April': 4,
              'May': 5,
