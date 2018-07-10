@@ -32,9 +32,8 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
 ('good_standing', 'Good Standing', 'Active', true, 0, 2147483647),
-('hours_alert', 'Hours Alert', 'Hours Alert', true, -7, -1),
 ('hours_suspended', 'Hours Suspended', 'Hours Susp.', false, -2147483648,
--8);
+-1);
 
 insert into equity_round(equity_round, display_name, description) VALUES
 ('2018_initial', 'Initial 2018 equity round',
