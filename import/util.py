@@ -6,11 +6,37 @@ import psycopg2
 # This file is gitignored - you'll need to provide your own copy
 import credentials
 
+MAPPING_FILE = 'mapping.csv'
+
 # Lowercase email addresses and remove whitespace.
 def normalize_email(email):
     email = email.lower().replace(' ', '').strip()
     email_parts = email.split("@", 1)
     return email_parts[0].replace('.','') + "@" + email_parts[1]
+
+# generate mapping of equivalent emails
+def email_mapping(mapping_file):
+    email_list = [l.split(",") for l in mapping_file]
+    mapping = {}
+    for e in email_list:
+        normalized = [normalize_email(em) for em in e]
+        for email in normalized:
+            mapping[email] = normalized
+    return mapping
+
+def read_mapping(name=MAPPING_FILE):
+    with open(name) as f:
+        return email_mapping(f.readlines())
+
+# check if email and it's mappings are in lookup
+def email_in(mapping, lookup, email):
+    mapped = mapping.get(email) or [email]
+    acc = False
+    for e in mapped:
+        found = e in lookup
+        if found:
+            acc = acc or found
+    return acc
 
 # Parse a Google Sheet timestamp string ('5/1/2018 21:07:52') to
 def parse_gs_timestamp(ts):

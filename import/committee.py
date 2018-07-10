@@ -63,6 +63,8 @@ def insert_hour(conn, row):
     with conn.cursor() as cursor:
         cursor.execute(query, row)
 
+mapping = util.read_mapping()
+
 def import_sheet(conn, sheet):
     committee = committee_title(sheet.title)
     header_map = dict([(c, i+1) for i, c in
@@ -75,10 +77,15 @@ def import_sheet(conn, sheet):
         # 1 indexed + account for header
         idx = row_idx + 2
         row = transform(committee, row)
-        if row['email'] not in owners:
+
+        # skip if blank, not approved, or already inserted
+        if not row['timestamp'] or not row['approved'] or row['database']:
+            continue
+        if not util.email_in(mapping, owners, row['email']):
             not_inserted.append(row)
             continue
-        # insert if not blank and not already inserted
-        if row['timestamp'] and row['approved'] and not row['database']:
-            insert_hour(conn, row)
-            sheet.update_cell((idx, header_map[DATABASE_COL]), 'inserted')
+
+        insert_hour(conn, row)
+        sheet.update_cell((idx, header_map[DATABASE_COL]), 'inserted')
+
+    return not_inserted

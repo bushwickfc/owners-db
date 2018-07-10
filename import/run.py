@@ -101,14 +101,15 @@ def meeting_import(args):
 
 def committee_import(args):
     with util.connection() as conn:
-        committee.import_committee(conn)
+        commitee_review = committee.import_committee(conn)
+    util.write_review_file(commitee_review, 'commitee_hour',
+                           'commitee work reports')
 
 def hours_debit(args):
     debit_date = args.debit_date
     if not debit_date:
         raise ValueError
     debit_date = util.parse_iso_date(args.debit_date)
-    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
