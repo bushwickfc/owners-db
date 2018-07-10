@@ -190,7 +190,7 @@ select *,
       from owner_equity_type
       where equity_type != 'legacy') oet
     join equity_type et on oet.equity_type = et.equity_type
-    join equity_log el on oet.email = el.email
+    left join equity_log el on oet.email = el.email
     group by oet.email, oet.start_date, et.payment_plan_amount, et.amount) as s;
 
 create view owner_view as

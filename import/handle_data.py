@@ -21,6 +21,7 @@ TIME = "Timestamp"
 
 # old members db
 OLD_ID = "MEMBER NUMBER"
+OLD_EMAIL = "EMAIL ADDRESS"
 POS_ID = "POS ID"
 TIME_BALANCE = "TIME BALANCE"
 
@@ -63,9 +64,14 @@ def convert_hours(hours):
 def process_master_db_data(master_db_raw_data):
     master_db_dict = {}
     for rd in master_db_raw_data:
-        master_db_dict[util.normalize_email(rd["EMAIL ADDRESS"])] = {'old_member_id': rd[OLD_ID],
-                                                  'pos_id': rd[POS_ID],
-                                                  'time_balance': rd[TIME_BALANCE]}
+        email = util.normalize_email(rd[OLD_EMAIL])
+        master_db_dict[email] = {
+            'old_member_id': rd[OLD_ID],
+            'pos_id': rd[POS_ID],
+            'time_balance': rd[TIME_BALANCE],
+            'email': email,
+            'first_name': rd['FIRST NAME'],
+            'last_name': rd['LAST NAME']}
 
     return master_db_dict
 

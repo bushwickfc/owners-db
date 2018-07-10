@@ -43,8 +43,9 @@ def owner_import(args):
     master_data = handle_data.execute(new_owner_raw_data,
                                       master_db_raw_data,
                                       dicts.master_data_dict)
-    insert.execute(master_data)
-    report.execute(master_data, dicts.master_data_dict)
+    #insert.execute(master_data)
+    report.execute(master_data,
+                   handle_data.process_master_db_data(master_db_raw_data))
 
 def equity_import(args):
     equity_csv = args.equity_payments
@@ -102,6 +103,13 @@ def committee_import(args):
     with util.connection() as conn:
         committee.import_committee(conn)
 
+def hours_debit(args):
+    debit_date = args.debit_date
+    if not debit_date:
+        raise ValueError
+    debit_date = util.parse_iso_date(args.debit_date)
+    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -132,6 +140,10 @@ if __name__ == '__main__':
 
     committee_parser = subparsers.add_parser('committee')
     committee_parser.set_defaults(func=committee_import)
+
+    hours_debit_parser = subparsers.add_parser('hours_debit')
+    shifts_parser.add_argument("--debit-date")
+    hours_debit_parser.set_defaults(func=hours_debit)
 
     args = parser.parse_args()
     args.func(args)

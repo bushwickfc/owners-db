@@ -8,6 +8,10 @@ import util
 SHIFTS_URL = "https://api.7shifts.com/v1/shifts"
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
+MANAGERS = set(["fran@bushwickfoodcoop.org",
+                "laurel@bushwickfoodcoop.org",
+                "annieghorner@bushwickfoodcoop.org"])
+
 def fetch_shifts(start_date, end_date):
     returned = None
     offset = 0

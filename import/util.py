@@ -10,11 +10,14 @@ import credentials
 def normalize_email(email):
     email = email.lower().replace(' ', '').strip()
     email_parts = email.split("@", 1)
-    email_parts[0].replace('.','') + "@" + email_parts[1]
+    return email_parts[0].replace('.','') + "@" + email_parts[1]
 
 # Parse a Google Sheet timestamp string ('5/1/2018 21:07:52') to
 def parse_gs_timestamp(ts):
     return datetime.strptime(ts, '%m/%d/%Y %H:%M:%S')
+
+def parse_iso_date(date):
+    return datetime.strptime(date, '%Y-%m-%d')
 
 def dedupe(seq, selector=None):
     seen = set()
