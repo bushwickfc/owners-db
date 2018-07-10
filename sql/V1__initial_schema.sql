@@ -222,10 +222,10 @@ select
   (oe.owner_price AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o
-join current_owner_type cot on o.email = cot.email
-join owner_type ot on ot.owner_type = cot.owner_type
+left join current_owner_type cot on o.email = cot.email
+left join owner_type ot on ot.owner_type = cot.owner_type
 left join hour_balance h on o.email = h.email
-join hour_status s on
+left join hour_status s on
   coalesce(h.balance, 0) >= s.minimum_balance
   and coalesce(h.balance, 0) <= s.maximum_balance
-join owner_equity oe on o.email = oe.email;
+left join owner_equity oe on o.email = oe.email;

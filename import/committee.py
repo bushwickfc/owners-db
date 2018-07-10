@@ -38,7 +38,8 @@ def fetch_committee_sheets():
 
 def import_committee(conn):
     sheets = fetch_committee_sheets()
-    import_sheet(conn, sheets[0])
+    for s in sheets:
+        import_sheet(conn, s)
 
 def month_to_date(month):
     time = datetime.now()

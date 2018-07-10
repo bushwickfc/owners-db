@@ -8,7 +8,9 @@ import credentials
 
 # Lowercase email addresses and remove whitespace.
 def normalize_email(email):
-    return email.lower().replace(' ', '').strip()
+    email = email.lower().replace(' ', '').strip()
+    email_parts = email.split("@", 1)
+    email_parts[0].replace('.','') + "@" + email_parts[1]
 
 # Parse a Google Sheet timestamp string ('5/1/2018 21:07:52') to
 def parse_gs_timestamp(ts):
