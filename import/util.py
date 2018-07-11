@@ -1,4 +1,5 @@
 import csv
+import copy
 from datetime import datetime
 
 import psycopg2
@@ -6,6 +7,8 @@ import psycopg2
 # This file is gitignored - you'll need to provide your own copy
 import credentials
 
+#TODO: put this in google sheet and have it optionally read
+#      from sheet or file.
 MAPPING_FILE = 'mapping.csv'
 
 # Lowercase email addresses and remove whitespace.
@@ -28,15 +31,33 @@ def read_mapping(name=MAPPING_FILE):
     with open(name) as f:
         return email_mapping(f.readlines())
 
-# check if email and it's mappings are in lookup
-def email_in(mapping, lookup, email):
+# check if email and it's mappings are in iterable
+def email_in(mapping, iterable, email):
     mapped = mapping.get(email) or [email]
-    acc = False
+    acc = None
     for e in mapped:
-        found = e in lookup
+        found = e in iterable
         if found:
-            acc = acc or found
+            acc = acc or e
     return acc
+
+# get mapped email from dicts
+def email_lookup(mapping, dictionary, email):
+    mapped = mapping.get(email) or [email]
+    for e in mapped:
+        item = dictionary.get(e)
+        if item:
+            return item
+    return None
+
+def data_email_exists(mapping, data, owners):
+    data_copy = [copy.copy(d) for d in data]
+    for d in data_copy:
+        d['email'] = email_in(mapping, owners, d['email'])
+    transformed = [d for d in data_copy if d['email']]
+    not_found = [d for d in data if not email_in(mapping, owners,
+                                                 d['email'])]
+    return transformed, not_found
 
 # Parse a Google Sheet timestamp string ('5/1/2018 21:07:52') to
 def parse_gs_timestamp(ts):

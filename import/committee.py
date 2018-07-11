@@ -1,10 +1,11 @@
+import copy
 from datetime import datetime
 
 import pygsheets
 
 import util
 
-SHEET_TITLE = 'Copy of Committee Work Hours Tracking (2018)'
+SHEET_TITLE = 'Committee Work Hours Tracking (2018)'
 
 MONTH_MAP = {'January': 1,
              'February': 2,
@@ -85,6 +86,8 @@ def import_sheet(conn, sheet):
             not_inserted.append(row)
             continue
 
+        row = copy.copy(row)
+        row['email'] = util.email_in(mapping, owners, row['email'])
         insert_hour(conn, row)
         sheet.update_cell((idx, header_map[DATABASE_COL]), 'inserted')
 

@@ -75,13 +75,10 @@ def process_master_db_data(master_db_raw_data):
 
     return master_db_dict
 
-# Based on the attr argument, get the value from the dicts of master_db data.
-# If we're dealing with 'time_balance', make sure to zero out any
-# negative or invalid values.
-def get_val_from_master_by_email(master_db_data, email, attr):
-    default_val = float(0) if attr == 'time_balance' else None
-    return_val = master_db_data[email][attr] if email in master_db_data and master_db_data[email][attr] != '' else default_val
-    return convert_hours(return_val) if attr == 'time_balance' else return_val
+mapping = util.read_mapping()
+
+def get_from_master(master, email):
+    return util.email_lookup(mapping, master, email) or {}
 
 # Strip any leading or trailing whitespace from each value.
 def strip_whitespace(owner_prop):
@@ -95,10 +92,9 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
     email = util.normalize_email(owner[EMAIL])
     return dict(master_data_dict,
                 join_date=util.parse_gs_timestamp(owner[TIME]),
-                pos_id=get_val_from_master_by_email(
+                pos_id=get_from_master(
                     processed_master_db_data,
-                    email,
-                    'pos_id'),
+                    email).get('pos_id'),
                 first_name=owner[FIRST_NAME],
                 last_name=owner[LAST_NAME],
                 email=email,
@@ -109,13 +105,13 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
                 city=owner[CITY],
                 state=owner[STATE],
                 zipcode=owner[ZIP],
-                amount=get_val_from_master_by_email(
-                    processed_master_db_data,
-                    email, 'time_balance'),
+                amount=convert_hours(
+                    get_from_master(processed_master_db_data,
+                                    email).get('time_balance', 0)),
                 owner_type=convert_owner_type(owner[O_TYPE]),
-                old_member_id=get_val_from_master_by_email(
+                old_member_id=get_from_master(
                     processed_master_db_data,
-                    email, 'old_member_id'))
+                    email).get('old_member_id'))
 
 def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
     print('Processing raw data...')

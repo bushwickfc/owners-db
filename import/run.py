@@ -43,7 +43,7 @@ def owner_import(args):
     master_data = handle_data.execute(new_owner_raw_data,
                                       master_db_raw_data,
                                       dicts.master_data_dict)
-    #insert.execute(master_data)
+    insert.execute(master_data)
     report.execute(master_data,
                    handle_data.process_master_db_data(master_db_raw_data))
 

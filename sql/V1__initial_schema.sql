@@ -153,7 +153,7 @@ create view current_owner_type as
 select
   distinct
   email,
-  max(owner_type) over (partition by email order by start_date desc)
+  first_value(owner_type) over (partition by email order by start_date desc)
     as owner_type
 from owner_owner_type;
 
@@ -166,7 +166,7 @@ select *,
   from
   (select
     oet.email,
-    sum(el.amount) as paid,
+    coalesce(sum(el.amount), 0) as paid,
     /* owe an installment every month until we reach full amount */
     least(
       (((DATE_PART('year', CURRENT_DATE) -
@@ -180,7 +180,7 @@ select *,
        have to pay a fee */
       select email,
       equity_type,
-      start_date - interval '1 month' as start_date
+      start_date + interval '1 month' as start_date
       from owner_equity_type
       where equity_type='legacy'
       union
@@ -205,7 +205,11 @@ select
   concat(o.first_name, ' ', o.last_name,
   ' // ',
   /* Status code */
-  (NOT (oe.owner_price AND s.owner_price AND ot.owner_price))::int + 1,
+  CASE WHEN oe.owner_price is null then
+  3
+  else
+  (NOT (oe.owner_price AND s.owner_price AND ot.owner_price))::int + 1
+  end,
   ' // ',
   /* Hour balance */
   coalesce(h.balance, 0),
@@ -217,9 +221,10 @@ select
   coalesce(h.balance, 0) as hour_balance,
   oe.paid as equity_paid,
   oe.due as equity_due,
+  least(oe.paid - oe.due, 0) as equity_delinquent,
   oe.owner_price as equity_current,
   s.owner_price as hours_current,
-  (oe.owner_price AND s.owner_price AND ot.owner_price)
+  (coalesce(oe.owner_price,false) AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o
 left join current_owner_type cot on o.email = cot.email

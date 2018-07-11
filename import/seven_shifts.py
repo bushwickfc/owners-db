@@ -8,9 +8,9 @@ import util
 SHIFTS_URL = "https://api.7shifts.com/v1/shifts"
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
-MANAGERS = set(["fran@bushwickfoodcoop.org",
-                "laurel@bushwickfoodcoop.org",
-                "annieghorner@bushwickfoodcoop.org"])
+# TODO: put in gsheet and optionally read from there or file
+# not in code to prevent exposing emails in repo
+MANAGERS = credentials.MANAGERS
 
 def fetch_shifts(start_date, end_date):
     returned = None
@@ -52,16 +52,17 @@ def transform(resp_obj):
             'hours': hours,
             'role': role.get('name') or ''}
 
+mapping = util.read_mapping()
+
 def insert(conn, shifts):
     owners = util.existing(conn, 'owner')
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
              values (%(email)s, %(hours)s, %(shift_start)s, 'shift')"""
-    user_shifts = [s for s in shifts if 'Manager' not in s['role']]
+    user_shifts = [s for s in shifts if 'Manager' not in s['role']
+                   and s['email'] not in MANAGERS]
     print('Manager shifts excluded: {}'.format(len(shifts) - len(user_shifts)))
-    user_shifts_ins = [s for s in user_shifts if
-                       s['email'] in owners]
-    user_shifts_not_ins = [s for s in user_shifts if
-                           s['email'] not in owners]
+    user_shifts_ins, user_shifts_not_ins = \
+     util.data_email_exists(mapping, user_shifts, owners)
     with conn.cursor() as cursor:
         cursor.executemany(query, user_shifts_ins)
     return user_shifts_not_ins

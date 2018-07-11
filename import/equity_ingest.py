@@ -29,20 +29,22 @@ def owner_equity_payment(row):
         'transaction_date': datetime.strptime(row['date'], '%Y-%m-%d').date(),
         'amount': row['TOTAL'] }
 
+mapping = util.read_mapping()
+
 def insert_equity_type(conn, equity_types):
     existing_equity = util.existing(conn, "owner_equity_type")
     owners = util.existing(conn, 'owner')
     equity_types = util.dedupe(equity_types, lambda x: x['email'])
     equity_types_new = [e for e in equity_types
-                        if e['email'] not in existing_equity]
-    equity_types_ins = [e for e in equity_types_new
-                        if e['email'] in owners]
+                        if not util.email_in(mapping, existing_equity,
+                                             e['email'])]
+    equity_types_ins, equity_types_not_ins = \
+     util.data_email_exists(mapping, equity_types_new, owners)
     query = """insert into owner_equity_type(email, equity_type, start_date) \
                values (%(email)s, %(equity_type)s, %(start_date)s)"""
     with conn.cursor() as cursor:
         cursor.executemany(query, equity_types_ins)
-    inserted = set([e['email'] for e in equity_types_ins])
-    return [e for e in equity_types_new if e['email'] not in inserted]
+    return equity_types_not_ins
 
 def last_update(conn):
     query = 'select max(transaction_date) from equity_log'
@@ -55,10 +57,8 @@ def insert_payment(conn, equity_payments):
     owners = util.existing(conn, 'owner')
     equity_payments_new = [p for p in equity_payments if
                            (not last) or p['transaction_date'] > last]
-    equity_payments_ins = [p for p in equity_payments_new
-                           if p['email'] in owners]
-    equity_payments_not_ins = [p for p in equity_payments_new
-                               if p['email'] not in owners]
+    equity_payments_ins, equity_payments_not_ins = \
+     util.data_email_exists(mapping, equity_payments_new, owners)
     query = """insert into equity_log(email, amount, transaction_date) \
                values (%(email)s, %(amount)s, %(transaction_date)s)"""
     with conn.cursor() as cursor:
