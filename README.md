@@ -83,3 +83,14 @@ host = 'localhost'
 ```
 
 Initially, I had used the 'standard' version of psycopg2, but it produced a warning that I should install psycopg2-binary instead... so I did.
+
+## Ingest steps
+`cd import`
+Import owners:
+`python3 run.py owner-import --new-owner {new_owner.csv} --master-sheet {members_db.csv`}
+Import equity payments + payment plans:
+`python3 run.py equity-import --equity-payments {equity_export.csv} --payment-agreement {payment_plan.csv}`
+Import 7shifts:
+`python3 run.py seven-shifts --end-date {1st of current month, ex 2018-06-01}`
+Import meeting hours:
+`python3 run.py meeting-attendance {meeting_attendance.csv}`

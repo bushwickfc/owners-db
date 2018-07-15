@@ -2,20 +2,13 @@
 import pygsheets
 
 # Get the raw data as a matrix
-def execute():
-    print('Fetching data from Google Sheets...')
+def fetch(sheet_name, worksheet_name):
+    print('Fetching {} from Google Sheets...'.format(sheet_name))
     # Authorize access to Google Drive/Google Sheet API - https://pygsheets.readthedocs.io/en/latest/authorizing.html
     gc = pygsheets.authorize(outh_file='client_secret.json', outh_nonlocal=True)
-    # Get the sheets by name - the new owner sheet for most of the info, older member db for additional info (POS ID, banked hours...).
-    new_owner_sheet = gc.open('Copy of New Owner Onboarding')
-    member_database = gc.open('Copy of BFC Member Database (ACTIVE)')
-    # Get the specific worksheets from each sheet.
-    new_owner_worksheet = new_owner_sheet.worksheet_by_title('All New Owners')
-    master_db_worksheet = member_database.worksheet_by_title('MASTER DB')
-    # Pull the values from the sheets as a matrix. In the case of the new_owner_worksheet,
-    # we start on row three to skip the header and test rows; in the case of the master_db_worksheet,
-    # we start at rwo two to skip the header.
-    new_owner_data = new_owner_worksheet.get_values(start=(3,1), end=(79,15), returnas='matrix')
-    master_db_data = master_db_worksheet.get_values(start=(2,1), end=(408,15), returnas='matrix')
+    sheet = gc.open(sheet_name)
+    # Get the specific worksheet from sheet.
+    worksheet = sheet.worksheet_by_title(worksheet_name)
+    data = worksheet.get_all_records()
 
-    return new_owner_data, master_db_data
+    return data

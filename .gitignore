@@ -1,7 +1,8 @@
 sheets.googleapis.com-python.json
 client_secret.json
-new_owner_onboarding.csv
+import/*.csv
 import/__pycache__/
 import/credentials.py
 no_old_member_id.csv
+all_import_local.sh
 *.pyc

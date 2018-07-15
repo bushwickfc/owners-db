@@ -1,6 +1,7 @@
 create table owner_type (
   owner_type varchar(20) NOT NULL,
   display_name varchar(255) NOT NULL,
+  pos_display varchar(10) NOT NULL,
   description varchar(255),
   work_requirement int NOT NULL,
   work_surrogate int NOT NULL,
@@ -23,7 +24,7 @@ create table owner (
   address text,
   city text,
   state text,
-  zipcode varchar(9),
+  zipcode varchar(10),
   payment_plan_delinquent boolean,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +69,7 @@ create table hour_log (
   email varchar(254) NOT NULL,
   amount int NOT NULL,
   hour_reason varchar(20) NOT NULL,
-  hour_date date NOT NULL,
+  hour_date timestamp NOT NULL,
   created_at timestamp DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(email, hour_reason, hour_date),
@@ -152,20 +153,20 @@ create view current_owner_type as
 select
   distinct
   email,
-  max(owner_type) over (partition by email order by start_date desc)
+  first_value(owner_type) over (partition by email order by start_date desc)
     as owner_type
 from owner_owner_type;
 
 create view owner_equity as
 select *,
   paid >= due as owner_price,
-  case when paid < due then ' // Equity Susp.'
+  case when paid < due then concat(' // ', paid - due)
        else ''
-  end as pos_display
+  end  as pos_display
   from
   (select
     oet.email,
-    sum(el.amount) as paid,
+    coalesce(sum(el.amount), 0) as paid,
     /* owe an installment every month until we reach full amount */
     least(
       (((DATE_PART('year', CURRENT_DATE) -
@@ -174,9 +175,22 @@ select *,
          DATE_PART('month', oet.start_date)))
            * et.payment_plan_amount),
       et.amount) as due
-    from owner_equity_type oet
-    join equity_type et on oet.equity_type = oet.equity_type
-    join equity_log el on oet.email = el.email
+    from (
+      /* legacy payment plans get an extra month to repay since they don't
+       have to pay a fee */
+      select email,
+      equity_type,
+      start_date + interval '1 month' as start_date
+      from owner_equity_type
+      where equity_type='legacy'
+      union
+      select email,
+      equity_type,
+      start_date
+      from owner_equity_type
+      where equity_type != 'legacy') oet
+    join equity_type et on oet.equity_type = et.equity_type
+    left join equity_log el on oet.email = el.email
     group by oet.email, oet.start_date, et.payment_plan_amount, et.amount) as s;
 
 create view owner_view as
@@ -184,20 +198,39 @@ select
   o.pos_id,
   ot.owner_type,
   ot.display_name as owner_type_name,
-  s.status,
   o.email,
   o.first_name,
   o.last_name,
-  concat(o.first_name, ' ', o.last_name, s.pos_display, oe.pos_display)
+  /* Name */
+  concat(o.first_name, ' ', o.last_name,
+  ' // ',
+  /* Status code */
+  CASE WHEN oe.owner_price is null then
+  3
+  else
+  (NOT (oe.owner_price AND s.owner_price AND ot.owner_price))::int + 1
+  end,
+  ' // ',
+  /* Hour balance */
+  coalesce(h.balance, 0),
+  /* Owner type code */
+  ot.pos_display,
+  /* Equity owed (if relevant) */
+  oe.pos_display)
     as pos_display,
   coalesce(h.balance, 0) as hour_balance,
-  (oe.owner_price AND s.owner_price AND ot.owner_price)
+  oe.paid as equity_paid,
+  oe.due as equity_due,
+  least(oe.paid - oe.due, 0) as equity_delinquent,
+  oe.owner_price as equity_current,
+  s.owner_price as hours_current,
+  (coalesce(oe.owner_price,false) AND s.owner_price AND ot.owner_price)
     as owner_price
 from owner o
-join current_owner_type cot on o.email = cot.email
-join owner_type ot on ot.owner_type = cot.owner_type
+left join current_owner_type cot on o.email = cot.email
+left join owner_type ot on ot.owner_type = cot.owner_type
 left join hour_balance h on o.email = h.email
-join hour_status s on
+left join hour_status s on
   coalesce(h.balance, 0) >= s.minimum_balance
   and coalesce(h.balance, 0) <= s.maximum_balance
-join owner_equity oe on o.email = oe.email;
+left join owner_equity oe on o.email = oe.email;
