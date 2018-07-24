@@ -67,6 +67,7 @@ def insert_hour(conn, row):
 mapping = util.read_mapping()
 
 def import_sheet(conn, sheet):
+    now_str = datetime.now().isoformat()
     committee = committee_title(sheet.title)
     header_map = dict([(c, i+1) for i, c in
                        enumerate(sheet.get_values((1,1), (1,sheet.cols))[0])
@@ -79,8 +80,8 @@ def import_sheet(conn, sheet):
         idx = row_idx + 2
         row = transform(committee, row)
 
-        # skip if blank, not approved, or already inserted
-        if not row['timestamp'] or not row['approved'] or row['database']:
+        # skip if blank or already inserted
+        if not row['timestamp'] or row['database']:
             continue
         if not util.email_in(mapping, owners, row['email']):
             not_inserted.append(row)
@@ -89,6 +90,6 @@ def import_sheet(conn, sheet):
         row = copy.copy(row)
         row['email'] = util.email_in(mapping, owners, row['email'])
         insert_hour(conn, row)
-        sheet.update_cell((idx, header_map[DATABASE_COL]), 'inserted')
+        sheet.update_cell((idx, header_map[DATABASE_COL]), now_str)
 
     return not_inserted

@@ -98,7 +98,8 @@ def execute(master_data):
         last_ingest = last_update(connection)
         # >= in case someone joins later in the day that we ran the ingest
         master_data = [d for d in master_data
-                       if (not last_ingest) or d['join_date'] >= last_ingest]
+                       if (not last_ingest) or
+                       d['join_date'].date() >= last_ingest]
 
         # Split up each owner's master_data into set of related table data
         # to be inserted

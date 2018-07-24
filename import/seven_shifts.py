@@ -62,7 +62,7 @@ def insert(conn, shifts):
                    and s['email'] not in MANAGERS]
     print('Manager shifts excluded: {}'.format(len(shifts) - len(user_shifts)))
     user_shifts_ins, user_shifts_not_ins = \
-     util.data_email_exists(mapping, user_shifts, owners)
+    util.data_email_exists(mapping, user_shifts, owners)
     with conn.cursor() as cursor:
         cursor.executemany(query, user_shifts_ins)
     return user_shifts_not_ins
