@@ -12,8 +12,13 @@ import credentials
 MAPPING_FILE = 'mapping.csv'
 
 # Lowercase email addresses and remove whitespace.
+def standardize_email(email):
+    return email.lower().replace(' ', '').strip()
+
+# also remove . from emails. This should be used for comparisons only
+# and emails stored in db should use `standardize_email`
 def normalize_email(email):
-    email = email.lower().replace(' ', '').strip()
+    email = standardize_email(email)
     email_parts = email.split("@", 1)
     return email_parts[0].replace('.','') + "@" + email_parts[1]
 

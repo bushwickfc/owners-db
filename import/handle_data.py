@@ -90,6 +90,7 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
     # Grab the email here, as it is also used as a reference key
     # against the master_db data.
     email = util.normalize_email(owner[EMAIL])
+    db_email = util.standardize_email(owner[EMAIL])
     return dict(master_data_dict,
                 join_date=util.parse_gs_timestamp(owner[TIME]),
                 pos_id=get_from_master(
@@ -97,7 +98,7 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
                     email).get('pos_id'),
                 first_name=owner[FIRST_NAME],
                 last_name=owner[LAST_NAME],
-                email=email,
+                email=db_email,
                 phone=owner[PHONE],
                 address=format_address(owner[BUILDING],
                                        owner[STREET],
