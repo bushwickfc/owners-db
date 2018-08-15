@@ -18,6 +18,7 @@ import util
 import seven_shifts
 import meeting
 import committee
+import hours_debit
 
 def owner_import(args):
     new_owner_csv = args.new_owner
@@ -105,11 +106,13 @@ def committee_import(args):
     util.write_review_file(commitee_review, 'commitee_hour',
                            'commitee work reports')
 
-def hours_debit(args):
+def debit(args):
     debit_date = args.debit_date
     if not debit_date:
         raise ValueError
     debit_date = util.parse_iso_date(args.debit_date)
+    with util.connection() as conn:
+        hours_debit.debit(conn, debit_date)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -142,9 +145,9 @@ if __name__ == '__main__':
     committee_parser = subparsers.add_parser('committee')
     committee_parser.set_defaults(func=committee_import)
 
-    hours_debit_parser = subparsers.add_parser('hours_debit')
-    shifts_parser.add_argument("--debit-date")
-    hours_debit_parser.set_defaults(func=hours_debit)
+    hours_debit_parser = subparsers.add_parser('hours-debit')
+    hours_debit_parser.add_argument("--debit-date")
+    hours_debit_parser.set_defaults(func=debit)
 
     args = parser.parse_args()
     args.func(args)

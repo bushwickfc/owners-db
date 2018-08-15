@@ -1,3 +1,4 @@
 pygsheets
 psycopg2-binary
 requests
+python-dateutil
