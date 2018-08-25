@@ -11,7 +11,7 @@ def transform(log):
     return { 'email': util.normalize_email(log['Email']),
              'first_name': log['First Name'],
              'last_name': log['Last Name'],
-             'timestamp': log['Timestamp'],
+             'timestamp': util.parse_gs_timestamp(log['Timestamp']),
              'date': util.parse_gs_timestamp(log['Timestamp'])}
 
 mapping = util.read_mapping()
