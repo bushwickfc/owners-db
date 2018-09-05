@@ -20,7 +20,10 @@ def standardize_email(email):
 def normalize_email(email):
     email = standardize_email(email)
     email_parts = email.split("@", 1)
-    return email_parts[0].replace('.','') + "@" + email_parts[1]
+    if len(email_parts) > 1:
+        return email_parts[0].replace('.','') + "@" + email_parts[1]
+    else:
+        return email
 
 # generate mapping of equivalent emails
 def email_mapping(mapping_file):
@@ -39,6 +42,7 @@ def read_mapping(name=MAPPING_FILE):
 # check if email and it's mappings are in iterable
 def email_in(mapping, iterable, email):
     mapped = mapping.get(email) or [email]
+    mapped.append(normalize_email(email))
     acc = None
     for e in mapped:
         found = e in iterable
@@ -89,7 +93,7 @@ def existing(conn, table):
     query = "select distinct email from {}".format(table)
     with conn.cursor() as cursor:
         cursor.execute(query)
-        return set([normalize_email(e[0]) for e in cursor.fetchall()])
+        return set([e[0] for e in cursor.fetchall()])
 
 def last_hour_update(conn, reason):
     query = "select max(hour_date) from hour_log where \

@@ -14,7 +14,7 @@ def equity_owed_to_type(owed):
 
 def owner_equity_type(row):
     return {
-        'email': util.normalize_email(
+        'email': util.standardize_email(
             row['Email Address / Correo Electrónico']),
         'start_date': util.parse_gs_timestamp(row['Timestamp']),
         'equity_type': equity_owed_to_type(
@@ -24,7 +24,7 @@ def owner_equity_type(row):
 
 def owner_equity_payment(row):
     return {
-        'email': util.normalize_email(row['SEARCHKEY']),
+        'email': util.standardize_email(row['SEARCHKEY']),
         'name': row['NAME'].split('//')[0].strip(),
         'transaction_date': datetime.strptime(row['date'], '%Y-%m-%d').date(),
         'amount': row['TOTAL'] }

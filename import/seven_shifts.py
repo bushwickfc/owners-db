@@ -43,7 +43,7 @@ def transform(resp_obj):
     start = datetime.strptime(shift['start'], TIME_FMT)
     end = datetime.strptime(shift['end'], TIME_FMT)
     hours = (end - start).total_seconds() / 3600
-    return {'email': util.normalize_email(user['email'] or ''),
+    return {'email': util.standardize_email(user['email'] or ''),
             'seven_shifts_id': user['id'],
             'firstname': user['firstname'],
             'lastname': user['lastname'],

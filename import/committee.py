@@ -20,9 +20,7 @@ MONTH_MAP = {'January': 1,
              'November': 11,
              'December': 12}
 
-APPROVAL_COL = 'COMMITTEE CHAIR APPROVAL (Please initial below to approve committee member hours. Board liaison should approve chair hours.)'
-
-DATABASE_COL = 'DATABASE'
+DATABASE_COL = 'Added to Database (Timestamp inserted by technology)'
 
 def committee_title(sheet_title):
     if sheet_title == 'Board of Directors':
@@ -55,8 +53,7 @@ def transform(committee, row):
              'date': month_to_date(row['Month worked']),
              'hours': row['Number of Hours'],
              'committee': committee,
-             'database': row.get(DATABASE_COL),
-             'approved': row.get(APPROVAL_COL) }
+             'database': row.get(DATABASE_COL) }
 
 def insert_hour(conn, row):
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \

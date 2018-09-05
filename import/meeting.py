@@ -8,7 +8,7 @@ def last_update(conn):
         return cursor.fetchone()[0]
 
 def transform(log):
-    return { 'email': util.normalize_email(log['Email']),
+    return { 'email': util.standardize_email(log['Email']),
              'first_name': log['First Name'],
              'last_name': log['Last Name'],
              'timestamp': util.parse_gs_timestamp(log['Timestamp']),
