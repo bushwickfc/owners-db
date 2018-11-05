@@ -35,10 +35,10 @@ def fetch_committee_sheets():
     # the filtered sheets contain approvals
     return sheet.worksheets()[1:]
 
-def import_committee(conn):
+def import_committee(conn, dry_run):
     sheets = fetch_committee_sheets()
     for s in sheets:
-        import_sheet(conn, s)
+        import_sheet(conn, s, dry_run)
 
 def month_to_date(month):
     time = datetime.now()
@@ -63,7 +63,7 @@ def insert_hour(conn, row):
 
 mapping = util.read_mapping()
 
-def import_sheet(conn, sheet):
+def import_sheet(conn, sheet, dry_run):
     now_str = datetime.now().isoformat()
     committee = committee_title(sheet.title)
     header_map = dict([(c, i+1) for i, c in
@@ -87,6 +87,10 @@ def import_sheet(conn, sheet):
         row = copy.copy(row)
         row['email'] = util.email_in(mapping, owners, row['email'])
         insert_hour(conn, row)
-        sheet.update_cell((idx, header_map[DATABASE_COL]), now_str)
+        if not dry_run:
+            print("updating GSheets")
+            sheet.update_cell((idx, header_map[DATABASE_COL]), now_str)
+        else:
+            print("dry run, not updating GSheets")
 
     return not_inserted

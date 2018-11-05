@@ -102,7 +102,7 @@ def meeting_import(args):
 
 def committee_import(args):
     with util.connection() as conn:
-        commitee_review = committee.import_committee(conn)
+        commitee_review = committee.import_committee(conn, args.dry_run)
     util.write_review_file(commitee_review, 'commitee_hour',
                            'commitee work reports')
 
@@ -143,7 +143,10 @@ if __name__ == '__main__':
     meeting_parser.set_defaults(func=meeting_import)
 
     committee_parser = subparsers.add_parser('committee')
-    committee_parser.set_defaults(func=committee_import)
+    dry_parser = committee_parser.add_mutually_exclusive_group(required=False)
+    dry_parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+    dry_parser.add_argument('--prod-run', dest='dry_run', action='store_false')
+    committee_parser.set_defaults(func=committee_import, dry_run=True)
 
     hours_debit_parser = subparsers.add_parser('hours-debit')
     hours_debit_parser.add_argument("--debit-date")
