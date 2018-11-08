@@ -146,7 +146,7 @@ if __name__ == '__main__':
     dry_parser = committee_parser.add_mutually_exclusive_group(required=False)
     dry_parser.add_argument('--dry-run', dest='dry_run', action='store_true')
     dry_parser.add_argument('--prod-run', dest='dry_run', action='store_false')
-    committee_parser.set_defaults(func=committee_import, dry_run=True)
+    committee_parser.set_defaults(func=committee_import)
 
     hours_debit_parser = subparsers.add_parser('hours-debit')
     hours_debit_parser.add_argument("--debit-date")
