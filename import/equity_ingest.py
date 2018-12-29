@@ -5,8 +5,10 @@ from datetime import datetime
 def equity_owed_to_type(owed):
     if owed == '$100':
         return 'legacy'
-    elif owed == '$150':
+    elif owed == '$150' or owed == '$150 ($25/mo)':
         return 'full'
+    elif owed == '$150 ($15/mo)':
+        return 'full_15'
     elif owed == '$15':
         return 'reduced'
     else:
