@@ -12,7 +12,6 @@ import dicts
 import import_from_google_sheet
 import handle_data
 import insert
-import report
 import equity_ingest
 import util
 import seven_shifts
@@ -22,7 +21,6 @@ import hours_debit
 
 def owner_import(args):
     new_owner_csv = args.new_owner
-    master_db_csv = args.master_sheet
     if not new_owner_csv:
         new_owner_raw_data = import_from_google_sheet.fetch(
             'Copy of New Owner Onboarding',
@@ -33,20 +31,9 @@ def owner_import(args):
             new_owner_raw_data = list(csv_reader)
     # skip the test row
     new_owner_raw_data = new_owner_raw_data[1:]
-    if not master_db_csv:
-        master_db_raw_data = import_from_google_sheet.fetch(
-            'Copy of BFC Member Database (ACTIVE)',
-            'MASTER DB')
-    else:
-        with open(master_db_csv) as f:
-            csv_reader = csv.DictReader(f)
-            master_db_raw_data = list(csv_reader)
     master_data = handle_data.execute(new_owner_raw_data,
-                                      master_db_raw_data,
                                       dicts.master_data_dict)
     insert.execute(master_data)
-    report.execute(master_data,
-                   handle_data.process_master_db_data(master_db_raw_data))
 
 def equity_import(args):
     equity_csv = args.equity_payments

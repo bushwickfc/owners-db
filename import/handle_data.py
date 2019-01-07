@@ -50,42 +50,14 @@ def convert_owner_type(owner_type):
     # https://docs.python.org/3/library/difflib.html#difflib.get_close_matches
     return difflib.get_close_matches(owner_type, types, 1, 0.2)[0]
 
-# Convert banked hours to a float.
-# Any incorrectly typed or empty string values should be zeroed out,
-# and any valid negative values should be zeroed out.
-def convert_hours(hours):
-    if not isfloat(hours) or hours == '' or float(hours) < 0:
-        return float(0)
-    else:
-        return float(hours)
-
-# Pull some important values out of each line of the master db, put them
-# in a dict, and nest them in a parent dict with the email as the key.
-def process_master_db_data(master_db_raw_data):
-    master_db_dict = {}
-    for rd in master_db_raw_data:
-        email = util.normalize_email(rd[OLD_EMAIL])
-        master_db_dict[email] = {
-            'old_member_id': rd[OLD_ID],
-            'pos_id': rd[POS_ID],
-            'time_balance': rd[TIME_BALANCE],
-            'email': email,
-            'first_name': rd['FIRST NAME'],
-            'last_name': rd['LAST NAME']}
-
-    return master_db_dict
-
 mapping = util.read_mapping()
-
-def get_from_master(master, email):
-    return util.email_lookup(mapping, master, email) or {}
 
 # Strip any leading or trailing whitespace from each value.
 def strip_whitespace(owner_prop):
     return owner_prop.strip()
 
 # From each row and the master_data_dict, create a dictionary for each owner
-def process_raw_data(owner, processed_master_db_data, master_data_dict):
+def process_raw_data(owner, master_data_dict):
     owner = {k: strip_whitespace(v) for k, v in owner.items()}
     # Grab the email here, as it is also used as a reference key
     # against the master_db data.
@@ -93,9 +65,6 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
     db_email = util.standardize_email(owner[EMAIL])
     return dict(master_data_dict,
                 join_date=util.parse_gs_timestamp(owner[TIME]),
-                pos_id=get_from_master(
-                    processed_master_db_data,
-                    email).get('pos_id'),
                 first_name=owner[FIRST_NAME],
                 last_name=owner[LAST_NAME],
                 email=db_email,
@@ -106,16 +75,9 @@ def process_raw_data(owner, processed_master_db_data, master_data_dict):
                 city=owner[CITY],
                 state=owner[STATE],
                 zipcode=owner[ZIP],
-                amount=convert_hours(
-                    get_from_master(processed_master_db_data,
-                                    email).get('time_balance', 0)),
-                owner_type=convert_owner_type(owner[O_TYPE]),
-                old_member_id=get_from_master(
-                    processed_master_db_data,
-                    email).get('old_member_id'))
+                owner_type=convert_owner_type(owner[O_TYPE]))
 
-def execute(new_owner_raw_data, master_db_raw_data, master_data_dict):
+def execute(new_owner_raw_data, master_data_dict):
     print('Processing raw data...')
-    processed_master_db_data = process_master_db_data(master_db_raw_data)
-    return [process_raw_data(rd, processed_master_db_data, master_data_dict)
+    return [process_raw_data(rd, master_data_dict)
             for rd in new_owner_raw_data]

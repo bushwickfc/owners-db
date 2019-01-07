@@ -10,13 +10,10 @@ import util
 def dict_to_tables(master_data):
     current_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
     owner_data = []
-    hour_log_data = []
     owner_owner_type_data = []
 
     for d in master_data:
         owner_dict = dict(dicts.owner_dict,
-                          old_member_id=d['old_member_id'],
-                          pos_id=d['pos_id'],
                           seven_shifts_id=d['seven_shifts_id'],
                           email=d['email'],
                           first_name=d['first_name'],
@@ -28,13 +25,6 @@ def dict_to_tables(master_data):
                           state=d['state'],
                           zipcode=d['zipcode'],
                           payment_plan_delinquent=d['payment_plan_delinquent'])
-        # In this import script, all hours logged are balance_carryovers...
-        # and I assume that the hour_date would just be the date of the import.
-        hour_log_dict = dict(dicts.hour_log_dict,
-                             email=d['email'],
-                             amount=d['amount'],
-                             hour_reason='balance_carryover',
-                                                  hour_date=current_date)
         # In this case, I assume that start_date is the same as join_date.
         owner_owner_type_dict = dict(
             dicts.owner_owner_type_dict, email=d['email'],
@@ -42,10 +32,9 @@ def dict_to_tables(master_data):
             owner_type=d['owner_type'])
 
         owner_data.append(owner_dict)
-        hour_log_data.append(hour_log_dict)
         owner_owner_type_data.append(owner_owner_type_dict)
 
-    return owner_data, hour_log_data, owner_owner_type_data
+    return owner_data, owner_owner_type_data
 
 # Create the cols and params from a dict from each table.
 def cols_from_dict(d):
@@ -103,12 +92,11 @@ def execute(master_data):
 
         # Split up each owner's master_data into set of related table data
         # to be inserted
-        owner_data, hour_log_data, owner_owner_type_data = \
+        owner_data, owner_owner_type_data = \
             dict_to_tables(master_data)
 
         # Using each table dict, turn the keys into cols and params
         owner_cols, owner_params = cols_from_dict(dicts.owner_dict)
-        hour_log_cols, hour_log_params = cols_from_dict(dicts.hour_log_dict)
         owner_owner_type_cols, owner_owner_type_params = cols_from_dict(dicts.owner_owner_type_dict)
 
         # Finally, put each set of data and its associated data for
@@ -117,8 +105,6 @@ def execute(master_data):
             {'data': owner_data, 'cols':
              owner_cols, 'params': owner_params,
              'table': 'owner'},
-            {'data': hour_log_data, 'cols': hour_log_cols,
-             'params': hour_log_params, 'table': 'hour_log'},
             {'data': owner_owner_type_data,
              'cols': owner_owner_type_cols,
              'params': owner_owner_type_params,
