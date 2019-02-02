@@ -6,3 +6,4 @@ import/credentials.py
 no_old_member_id.csv
 all_import_local.sh
 *.pyc
+pos_backup.dump
