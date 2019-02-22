@@ -44,7 +44,7 @@ insert into equity_type(equity_round, equity_type, display_name,
 ('2018_initial', 'full', 'Full Price', 'Full price equity share', 150.00,
  25.00),
  ('2018_initial', 'full_15', 'Full Price (15)', 'Full price equity share',
- 150.00, 15.00)
+ 150.00, 15.00),
 ('2018_initial', 'legacy', 'Legacy', 'Discounted equity share', 100.00,
  25.00),
 ('2018_initial', 'reduced', 'Reduced', 'Reduced equity share', 15.00,
