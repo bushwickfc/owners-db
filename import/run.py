@@ -62,8 +62,7 @@ def seven_shifts_import(args):
         if not start_date:
             last = util.last_hour_update(conn, 'shift')
             if last:
-                # add one day becuase seven shifts api only supports greater
-                # than
+                # add one day because seven shifts api only supports greater than
                 last = (last + timedelta(days=1)).isoformat()
             # if we have no shift data, this is where the old db stops
             start_date = last or '2018-06-01'
