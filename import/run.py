@@ -88,9 +88,9 @@ def meeting_import(args):
 
 def committee_import(args):
     with util.connection() as conn:
-        commitee_review = committee.import_committee(conn, args.dry_run)
-    util.write_review_file(commitee_review, 'commitee_hour',
-                           'commitee work reports')
+        committee_review = committee.import_committee(conn, args.dry_run)
+    util.write_review_file(committee_review, 'committee_hour',
+                           'committee work reports')
 
 def debit(args):
     debit_date = args.debit_date

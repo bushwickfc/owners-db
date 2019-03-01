@@ -37,8 +37,12 @@ def fetch_committee_sheets():
 
 def import_committee(conn, dry_run):
     sheets = fetch_committee_sheets()
+    not_inserted = []
     for s in sheets:
-        import_sheet(conn, s, dry_run)
+        result = import_sheet(conn, s, dry_run)
+        not_inserted.append(result)
+    # flatten the list of uninserted commmittee hours
+    return [item for sublist in not_inserted for item in sublist]
 
 def month_to_date(month):
     time = datetime.now()
