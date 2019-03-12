@@ -7,7 +7,8 @@ insert into owner_type(owner_type, display_name, pos_display, work_requirement,
 ('pregnancy', 'Pregnancy', ' // P', 0, 0, 1, true),
 ('family_leave', 'Family Leave', ' // FL', 0, 0, 1, true),
 ('hold', 'Hold', ' // H', 0, 0, 0, false),
-('inactive', 'Inactive', ' // I', 0, 0, 0, false);
+('inactive', 'Inactive', ' // I', 0, 0, 0, false),
+('staff', 'Staff', ' // ST', 0, 0, 0, true);
 
 insert into hour_reason(hour_reason, display_name, description)  VALUES
 ('shift', 'Store Shift', 'In store shift'),

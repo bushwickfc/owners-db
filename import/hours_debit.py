@@ -26,7 +26,8 @@ def debit(conn, date):
                     where end_date > %s or end_date is null) cot
                join owner_type ot on cot.owner_type = ot.owner_type
                join owner_equity_type oet on oet.email = cot.email
-               where oet.start_date < %s)"""
+               where oet.start_date < %s
+               and cot.owner_type <> 'staff')"""
     with conn.cursor() as cursor:
         cursor.execute(query, (date, date, cutoff))
         print('Hours debited')
