@@ -1,4 +1,12 @@
 import util
+import google_sheets
+
+SHEET_TITLE = 'Monthly Co-op Meeting Attendance Tracking'
+
+def import_meeting():
+    sheet = google_sheets.fetch_sheets(SHEET_TITLE, 1)
+
+
 
 def last_update(conn):
     query = "select max(hour_date) from hour_log where \
