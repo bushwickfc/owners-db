@@ -74,17 +74,23 @@ def seven_shifts_import(args):
     util.write_review_file(ss_review, 'shift_data', 'shift data')
 
 def meeting_import(args):
-    with open(args.attendance_csv) as f:
-        csv_reader = csv.DictReader(f)
-        meeting_csv = list(csv_reader)
-    # need to check cell because there is a blank line at the beginning of
-    # the file
-    meeting_attendance = [meeting.transform(m) for m in meeting_csv
-                          if m['Timestamp']]
     with util.connection() as conn:
-        m_review = meeting.import_meeting(conn, meeting_attendance)
-    util.write_review_file(m_review, 'meeting_attendance',
-                           'meeting attendance entries')
+        meeting_review = meeting.import_meeting(conn)
+    print(meeting_review)
+    # util.write_review_file(meeting_review, 'meeting_attendance',
+    #                         'meeting attendance entries')
+
+    # with open(args.attendance_csv) as f:
+    #     csv_reader = csv.DictReader(f)
+    #     meeting_csv = list(csv_reader)
+    # # need to check cell because there is a blank line at the beginning of
+    # # the file
+    # meeting_attendance = [meeting.transform(m) for m in meeting_csv
+    #                       if m['Timestamp']]
+    # with util.connection() as conn:
+    #     m_review = meeting.import_meeting(conn, meeting_attendance)
+    # util.write_review_file(m_review, 'meeting_attendance',
+    #                        'meeting attendance entries')
 
 def committee_import(args):
     with util.connection() as conn:
@@ -125,7 +131,7 @@ if __name__ == '__main__':
     shifts_parser.set_defaults(func=seven_shifts_import)
 
     meeting_parser = subparsers.add_parser('meeting-attendance')
-    meeting_parser.add_argument("attendance_csv")
+    # meeting_parser.add_argument("attendance_csv")
     meeting_parser.set_defaults(func=meeting_import)
 
     committee_parser = subparsers.add_parser('committee')

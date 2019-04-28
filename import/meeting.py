@@ -3,13 +3,17 @@ import google_sheets
 
 SHEET_TITLE = 'Monthly Co-op Meeting Attendance Tracking'
 
-def import_meeting():
-    sheet = google_sheets.fetch_sheets(SHEET_TITLE, 1)
-    for s in sheet:
-        print(s.get_all_records())
+def import_meeting(conn):
+    sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1)
+    not_inserted = []
+    for s in sheets:
+        import_sheet(conn, s)
 
-
-
+def import_sheet(conn, sheet):
+    rows = sheet.get_all_records()
+    for row_idx, row in enumerate(rows):
+            [transform(r) for r in rows]
+        # [transform(r) for r in rows if r['Timestamp']]
 
 
 # def last_update(conn):
@@ -19,12 +23,13 @@ def import_meeting():
 #         cursor.execute(query)
 #         return cursor.fetchone()[0]
 
-# def transform(log):
-#     return { 'email': util.standardize_email(log['Email']),
-#              'first_name': log['First Name'],
-#              'last_name': log['Last Name'],
-#              'timestamp': util.parse_gs_timestamp(log['Timestamp']),
-#              'date': util.parse_gs_timestamp(log['Timestamp'])}
+def transform(row):
+    print(row)
+    # return { 'email': util.standardize_email(row['Email']),
+    #          'first_name': row['First Name'],
+    #          'last_name': row['Last Name'],
+    #          'timestamp': util.parse_gs_timestamp(row['Timestamp']),
+    #          'date': util.parse_gs_timestamp(row['Timestamp'])}
 
 # mapping = util.read_mapping()
 
