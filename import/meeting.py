@@ -12,9 +12,12 @@ def import_meeting(conn):
 
 def import_sheet(conn, sheet):
     rows = sheet.get_all_records()
-    for row_idx, row in enumerate(rows):
-        result = [transform(r) for r in rows if len(list(r.keys())) > 0]
-    print(result)
+    for row in rows:
+        if len(list(row.keys())) > 0:
+            row = transform(row) 
+            print(row)
+        else:
+            continue
 
 def transform(row):
     return { 'email': util.standardize_email(row['Email']),
