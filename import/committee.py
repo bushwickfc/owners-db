@@ -38,6 +38,7 @@ def committee_title(sheet_title):
 
 def import_committee(conn, dry_run):
     # sheets = fetch_committee_sheets()
+    # Grab all of the pages, except for the first one.
     sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1, None)
     not_inserted = []
     for s in sheets:
