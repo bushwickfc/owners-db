@@ -3,6 +3,8 @@ import google_sheets
 
 SHEET_TITLE = 'Monthly Co-op Meeting Attendance Tracking'
 
+DATABASE_COL = 'DATABASE (Place an X when hours have been added to database by hours@)'
+
 def import_meeting(conn):
     # Get the second page of the sheet.
     sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1)
@@ -13,9 +15,14 @@ def import_meeting(conn):
 def import_sheet(conn, sheet):
     rows = sheet.get_all_records()
     for row in rows:
+        # Skip any empty row, likely the first.
         if len(list(row.keys())) > 0:
             row = transform(row) 
-            print(row)
+
+            if not row['timestamp'] or row['database']:
+                print(row)
+            else:
+                continue
         else:
             continue
 
@@ -24,7 +31,8 @@ def transform(row):
              'first_name': row['First Name'],
              'last_name': row['Last Name'],
              'timestamp': util.parse_gs_timestamp(row['Timestamp']),
-             'date': util.parse_gs_timestamp(row['Timestamp'])}
+             'date': util.parse_gs_timestamp(row['Timestamp']),
+             'database': row.get(DATABASE_COL) }
 
 
 
