@@ -76,9 +76,8 @@ def seven_shifts_import(args):
 def meeting_import(args):
     with util.connection() as conn:
         meeting_review = meeting.import_meeting(conn)
-    print(meeting_review)
-    # util.write_review_file(meeting_review, 'meeting_attendance',
-    #                         'meeting attendance entries')
+    util.write_review_file(meeting_review, 'meeting_attendance',
+                            'meeting attendance entries')
 
     # with open(args.attendance_csv) as f:
     #     csv_reader = csv.DictReader(f)
