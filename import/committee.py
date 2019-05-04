@@ -1,10 +1,8 @@
 import copy
 from datetime import datetime
 
-# import pygsheets
-
-import util
 import google_sheets
+import util
 
 SHEET_TITLE = 'Committee Work Hours Tracking (2018)'
 
@@ -20,8 +18,6 @@ MONTH_MAP = {'January': 1,
              'October': 10,
              'November': 11,
              'December': 12}
-
-DATABASE_COL = 'Added to Database (Timestamp inserted by technology)'
 
 def committee_title(sheet_title):
     if sheet_title == 'Board of Directors':
@@ -60,7 +56,7 @@ def transform(committee, row):
              'date': month_to_date(row['Month worked']),
              'hours': row['Number of Hours'],
              'committee': committee,
-             'database': row.get(DATABASE_COL) }
+             'database': row.get(google_sheets.DATABASE_COL) }
 
 def insert_hour(conn, row):
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
@@ -71,11 +67,9 @@ def insert_hour(conn, row):
 mapping = util.read_mapping()
 
 def import_sheet(conn, sheet, dry_run):
-    now_str = datetime.now().isoformat()
+    now_str = util.get_now_str()
     committee = committee_title(sheet.title)
-    header_map = dict([(c, i+1) for i, c in
-                       enumerate(sheet.get_values((1,1), (1,sheet.cols))[0])
-                       if c])
+    header_map = google_sheets.get_header_map(sheet)
     rows = sheet.get_all_records()
     owners = util.existing(conn, 'owner')
     not_inserted = []
@@ -96,7 +90,7 @@ def import_sheet(conn, sheet, dry_run):
         insert_hour(conn, row)
         if not dry_run:
             print("updating GSheets")
-            sheet.update_cell((idx, header_map[DATABASE_COL]), now_str)
+            google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
         else:
             print("dry run, not updating GSheets")
 

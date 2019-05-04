@@ -2,8 +2,6 @@ import util
 import google_sheets
 
 SHEET_TITLE = 'Monthly Co-op Meeting Attendance Tracking'
-DATABASE_COL = 'DATABASE (Place an X when hours have been added to database by hours@)'
-mapping = util.read_mapping()
 
 def transform(row):
     return { 'email': util.standardize_email(row['Email']),
@@ -11,11 +9,12 @@ def transform(row):
              'last_name': row['Last Name'],
              'timestamp': util.parse_gs_timestamp(row['Timestamp']),
              'date': util.parse_gs_timestamp(row['Timestamp']),
-             'database': row.get(DATABASE_COL) }
+             'database': row.get(google_sheets.DATABASE_COL) }
 
 def import_meeting(conn):
     # Get the second page of the sheet.
-    sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1)
+    # DON'T FORGET TO CHANGE THIS BACK TO 1 - CURRENTLY USING A TEST SHEET
+    sheets = google_sheets.fetch_sheets(SHEET_TITLE, 2)
     for s in sheets:
         result = import_sheet(conn, s)
     return result
@@ -29,18 +28,26 @@ def insert_meeting(conn, row):
     #     cursor.execute(query, row)
 
 def import_sheet(conn, sheet):
+    mapping = util.read_mapping()
+    header_map = google_sheets.get_header_map(sheet)
+    now_str = util.get_now_str()
     rows = sheet.get_all_records()
     # Skip any empty row, likely the first
+    # BE CAREFUL - THIS MIGHT SCREW UP THE row_idx LOGIC BELOW
     transormed_rows = [transform(row) for row in rows if len(list(row.keys())) > 0]
     owners = util.existing(conn, 'owner')
     log_ins, log_not_ins = \
                        util.data_email_exists(mapping, transormed_rows, owners)
 
-    for row in log_ins:
+    for row_idx, row in enumerate(log_ins):
+        idx = row_idx + 2
+
         if row['database'] == None:
             insert_meeting(conn, row)
         else:
             continue
+
+        google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
 
     return log_not_ins
 
