@@ -13,7 +13,7 @@ def transform(row, row_idx):
              'row_idx': row_idx }
 
 def import_meeting(conn):
-    # Get the second page of the sheet.
+    # We use the second page of the meetings sheet.
     # DON'T FORGET TO CHANGE THIS BACK TO 1 - CURRENTLY USING A TEST SHEET
     sheets = google_sheets.fetch_sheets(SHEET_TITLE, 2)
     for s in sheets:
@@ -21,12 +21,11 @@ def import_meeting(conn):
     return result
 
 def insert_meeting(conn, row):
-    print(row)
-    # # meetings are 2 hours
-    # query = """insert into hour_log(email, amount, hour_date, hour_reason) \
-    #            values (%(email)s, 2, %(date)s, 'meeting')"""
-    # with conn.cursor() as cursor:
-    #     cursor.execute(query, row)
+    # meetings are 2 hours
+    query = """insert into hour_log(email, amount, hour_date, hour_reason) \
+               values (%(email)s, 2, %(date)s, 'meeting')"""
+    with conn.cursor() as cursor:
+        cursor.execute(query, row)
 
 def import_sheet(conn, sheet):
     mapping = util.read_mapping()
