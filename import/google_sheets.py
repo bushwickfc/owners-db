@@ -6,6 +6,9 @@ import pygsheets
 # update this column with the current timestamp as records are inserted.
 DATABASE_COL = 'Added to Database (Timestamp inserted by technology)'
 
+def get_all_records(sheet):
+    return sheet.get_all_records()
+
 # Get a set of sheets, based on the sheet title.
 # start and end may be set to None in order to access a range of pages like [:3], etc.
 def fetch_sheets(sheet_title, start, end = False):

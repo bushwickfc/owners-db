@@ -70,7 +70,7 @@ def import_sheet(conn, sheet, dry_run):
     now_str = util.get_now_str()
     committee = committee_title(sheet.title)
     header_map = google_sheets.get_header_map(sheet)
-    rows = sheet.get_all_records()
+    rows = google_sheets.get_all_records(sheet)
     owners = util.existing(conn, 'owner')
     not_inserted = []
     for row_idx, row in enumerate(rows):

@@ -31,10 +31,9 @@ def import_sheet(conn, sheet):
     mapping = util.read_mapping()
     header_map = google_sheets.get_header_map(sheet)
     now_str = util.get_now_str()
-    rows = sheet.get_all_records()
+    rows = google_sheets.get_all_records(sheet)
     # Skip any empty row, likely the first
-    # BE CAREFUL - THIS MIGHT SCREW UP THE row_idx LOGIC BELOW
-    transormed_rows = [transform(row) for row in rows if len(list(row.keys())) > 0]
+    transormed_rows = [transform(row) for row in rows]
     owners = util.existing(conn, 'owner')
     log_ins, log_not_ins = \
                        util.data_email_exists(mapping, transormed_rows, owners)
@@ -44,37 +43,9 @@ def import_sheet(conn, sheet):
 
         if row['database'] == None:
             insert_meeting(conn, row)
+            # THIS IS NOT YET WORKING CORRECTLY - MAY UPDATE UNINSERTED RECORDS... log_ins NEEDS TO PRESERVE ITS ACTUAL ROW INDEXES.
+            google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
         else:
             continue
 
-        google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
-
     return log_not_ins
-
-
-
-
-
-
-# def last_update(conn):
-#     query = "select max(hour_date) from hour_log where \
-#                   hour_reason = 'meeting'"
-#     with conn.cursor() as cursor:
-#         cursor.execute(query)
-#         return cursor.fetchone()[0]
-
-# mapping = util.read_mapping()
-
-# def import_meeting(conn, meeting_attendance):
-#     last = last_update(conn)
-#     owners = util.existing(conn, 'owner')
-#     log_new = [l for l in meeting_attendance
-#                if (not last) or l['timestamp'] > last]
-#     log_ins, log_not_ins = \
-#                            util.data_email_exists(mapping, log_new, owners)
-#     # meetings are 2 hours
-#     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
-#                values (%(email)s, 2, %(date)s, 'meeting')"""
-#     with conn.cursor() as cursor:
-#         cursor.executemany(query, log_ins)
-#     return log_not_ins
