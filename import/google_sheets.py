@@ -1,5 +1,4 @@
 # Dealing with Google Sheets and its API
-
 import pygsheets
 
 # Check against this column to see if a record needs to be inserted into the DB;
