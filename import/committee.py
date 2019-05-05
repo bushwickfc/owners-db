@@ -88,10 +88,6 @@ def import_sheet(conn, sheet, dry_run):
         row = copy.copy(row)
         row['email'] = util.email_in(mapping, owners, row['email'])
         insert_hour(conn, row)
-        if not dry_run:
-            print("updating GSheets")
-            google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
-        else:
-            print("dry run, not updating GSheets")
+        google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
 
     return not_inserted

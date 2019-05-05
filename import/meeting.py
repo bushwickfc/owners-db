@@ -12,12 +12,11 @@ def transform(row, row_idx):
              'database': row.get(google_sheets.DATABASE_COL),
              'row_idx': row_idx }
 
-def import_meeting(conn):
+def import_meeting(conn, dry_run):
     # We use the second page of the meetings sheet.
-    # DON'T FORGET TO CHANGE THIS BACK TO 1 - CURRENTLY USING A TEST SHEET
-    sheets = google_sheets.fetch_sheets(SHEET_TITLE, 2)
+    sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1)
     for s in sheets:
-        result = import_sheet(conn, s)
+        result = import_sheet(conn, s, dry_run)
     return result
 
 def insert_meeting(conn, row):
@@ -27,7 +26,7 @@ def insert_meeting(conn, row):
     with conn.cursor() as cursor:
         cursor.execute(query, row)
 
-def import_sheet(conn, sheet):
+def import_sheet(conn, sheet, dry_run):
     mapping = util.read_mapping()
     header_map = google_sheets.get_header_map(sheet)
     now_str = util.get_now_str()
@@ -38,9 +37,12 @@ def import_sheet(conn, sheet):
                        util.data_email_exists(mapping, transormed_rows, owners)
 
     for row in log_ins:
+        # The actual row index in the GSheet will be two more than the row's position in the list.
+        idx = row['row_idx'] + 2
+
         if row['database'] == None:
             insert_meeting(conn, row)
-            google_sheets.update_cell(sheet, row['row_idx'] + 2, header_map[google_sheets.DATABASE_COL], now_str)
+            google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str, dry_run)
         else:
             continue
 

@@ -22,5 +22,10 @@ def get_header_map(sheet):
                 enumerate(sheet.get_values((1,1), (1,sheet.cols))[0])
                 if c])
 
-def update_cell(sheet, row_idx, col_num, val):
-    sheet.update_cell((row_idx, col_num), val)
+# Update the Google Sheet with the timestamp of the ingest, unless it's a dry_run.
+def update_cell(sheet, row_idx, col_num, val, dry_run):
+    if not dry_run:
+        print("Updating GSheets...")
+        sheet.update_cell((row_idx, col_num), val)
+    else:
+        print("Dry run, not updating GSheets...")
