@@ -25,15 +25,7 @@ def committee_title(sheet_title):
     else:
         return sheet_title.lower()
 
-# def fetch_committee_sheets():
-#     gc = pygsheets.authorize(outh_file='client_secret.json', outh_nonlocal=True)
-#     sheet = gc.open(SHEET_TITLE)
-#     # ignore first sheet which contains all responses
-#     # the filtered sheets contain approvals
-#     return sheet.worksheets()[1:]
-
 def import_committee(conn, dry_run):
-    # sheets = fetch_committee_sheets()
     # Grab all of the pages, except for the first one.
     sheets = google_sheets.fetch_sheets(SHEET_TITLE, 1, None)
     not_inserted = []
