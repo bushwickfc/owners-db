@@ -88,6 +88,6 @@ def import_sheet(conn, sheet, dry_run):
         row = copy.copy(row)
         row['email'] = util.email_in(mapping, owners, row['email'])
         insert_hour(conn, row)
-        google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str)
+        google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str, dry_run)
 
     return not_inserted

@@ -10,7 +10,7 @@ def transform(row, row_idx):
              'timestamp': util.parse_gs_timestamp(row['Timestamp']),
              'date': util.parse_gs_timestamp(row['Timestamp']),
              'database': row.get(google_sheets.DATABASE_COL),
-             'row_idx': row_idx }
+             'row_idx': row_idx } # Store the row's index as well, used for updating the GSheet
 
 def import_meeting(conn, dry_run):
     # We use the second page of the meetings sheet.
@@ -31,10 +31,10 @@ def import_sheet(conn, sheet, dry_run):
     header_map = google_sheets.get_header_map(sheet)
     now_str = util.get_now_str()
     rows = google_sheets.get_all_records(sheet)
-    transormed_rows = [transform(row, row_idx) for row_idx, row in enumerate(rows)]
+    transformed_rows = [transform(row, row_idx) for row_idx, row in enumerate(rows)]
     owners = util.existing(conn, 'owner')
     log_ins, log_not_ins = \
-                       util.data_email_exists(mapping, transormed_rows, owners)
+                       util.data_email_exists(mapping, transformed_rows, owners)
 
     for row in log_ins:
         # The actual row index in the GSheet will be two more than the row's position in the list.
