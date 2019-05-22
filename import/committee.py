@@ -36,15 +36,18 @@ def import_committee(conn, dry_run):
     return [item for sublist in not_inserted for item in sublist]
 
 def month_and_year_to_date(month, year):
-    return datetime(day=1,month=MONTH_MAP[month],year=int(year))
+    return datetime(day=1,month=MONTH_MAP[month],year=year)
 
 def transform(committee, row):
+    # if no row['Year worked'] or row['Year worked'] is '', sub in the current year...
+    # likely to only be an issue the first time we run this script
+    year = datetime.now().year if 'Year worked' not in row or row['Year worked'] == '' else row['Year worked']
     return { 'email': util.normalize_email(row['Email Address']),
              'timestamp': row['Timestamp'],
              'first_name': row['First Name'], # still in use?
              'last_name': row['Last Name'], # still in use?
              'month_worked': row['Month worked'], # still in use?
-             'date': month_and_year_to_date(row['Month worked'], row['Year worked']),
+             'date': month_and_year_to_date(row['Month worked'], year),
              'hours': row['Number of Hours'],
              'committee': committee,
              'database': row.get(google_sheets.DATABASE_COL) }
