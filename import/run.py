@@ -74,17 +74,10 @@ def seven_shifts_import(args):
     util.write_review_file(ss_review, 'shift_data', 'shift data')
 
 def meeting_import(args):
-    with open(args.attendance_csv) as f:
-        csv_reader = csv.DictReader(f)
-        meeting_csv = list(csv_reader)
-    # need to check cell because there is a blank line at the beginning of
-    # the file
-    meeting_attendance = [meeting.transform(m) for m in meeting_csv
-                          if m['Timestamp']]
     with util.connection() as conn:
-        m_review = meeting.import_meeting(conn, meeting_attendance)
-    util.write_review_file(m_review, 'meeting_attendance',
-                           'meeting attendance entries')
+        meeting_review = meeting.import_meeting(conn, args.dry_run)
+    util.write_review_file(meeting_review, 'meeting_attendance',
+                            'meeting attendance entries')
 
 def committee_import(args):
     with util.connection() as conn:
@@ -125,11 +118,13 @@ if __name__ == '__main__':
     shifts_parser.set_defaults(func=seven_shifts_import)
 
     meeting_parser = subparsers.add_parser('meeting-attendance')
-    meeting_parser.add_argument("attendance_csv")
+    dry_parser = meeting_parser.add_mutually_exclusive_group(required=True)
+    dry_parser.add_argument('--dry-run', dest='dry_run', action='store_true')
+    dry_parser.add_argument('--prod-run', dest='dry_run', action='store_false')
     meeting_parser.set_defaults(func=meeting_import)
 
     committee_parser = subparsers.add_parser('committee')
-    dry_parser = committee_parser.add_mutually_exclusive_group(required=False)
+    dry_parser = committee_parser.add_mutually_exclusive_group(required=True)
     dry_parser.add_argument('--dry-run', dest='dry_run', action='store_true')
     dry_parser.add_argument('--prod-run', dest='dry_run', action='store_false')
     committee_parser.set_defaults(func=committee_import)
