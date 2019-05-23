@@ -111,3 +111,6 @@ def write_review_file(to_review, review_type, hum_name):
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(to_review)
+
+def get_now_str():
+    return datetime.now().isoformat()
