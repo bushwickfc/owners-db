@@ -4,13 +4,18 @@ import google_sheets
 SHEET_TITLE = 'Monthly Co-op Meeting Attendance Tracking'
 
 def transform(row, row_idx):
+    # Store the row's index as well, used for updating the GSheet.
+    # Note that we increment the row's index by 2 - GSheet rows are
+    # 1 indexed and, since our sheets have header rows, the first actual
+    # row of data is row 2... so the 0 element in our incoming list of
+    # rows corresponds to row 2 in the sheet, etc.
     return { 'email': util.standardize_email(row['Email']),
              'first_name': row['First Name'],
              'last_name': row['Last Name'],
              'timestamp': util.parse_gs_timestamp(row['Timestamp']),
              'date': util.parse_gs_timestamp(row['Timestamp']),
              'database': row.get(google_sheets.DATABASE_COL),
-             'row_idx': row_idx } # Store the row's index as well, used for updating the GSheet
+             'row_idx': row_idx + 2 }
 
 def import_meeting(conn, dry_run):
     # We use the second page of the meetings sheet.
@@ -37,12 +42,9 @@ def import_sheet(conn, sheet, dry_run):
                        util.data_email_exists(mapping, transformed_rows, owners)
 
     for row in log_ins:
-        # The actual row index in the GSheet will be two more than the row's position in the list.
-        idx = row['row_idx'] + 2
-
         if row['database'] == None:
             insert_meeting(conn, row)
-            google_sheets.update_cell(sheet, idx, header_map[google_sheets.DATABASE_COL], now_str, dry_run)
+            google_sheets.update_cell(sheet, row['row_idx'], header_map[google_sheets.DATABASE_COL], now_str, dry_run)
         else:
             continue
 
