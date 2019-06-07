@@ -60,7 +60,7 @@ def seven_shifts_import(args):
     start_date, end_date = args.start_date, args.end_date
     with util.connection() as conn:
         if not start_date:
-            last = util.last_hour_update(conn, 'shift')
+            last = util.last_hour_update(conn, 'shift_automated')
             if last:
                 # add one day because seven shifts api only supports greater than
                 last = (last + timedelta(days=1)).isoformat()

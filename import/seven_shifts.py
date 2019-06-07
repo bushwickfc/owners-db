@@ -57,7 +57,7 @@ mapping = util.read_mapping()
 def insert(conn, shifts):
     owners = util.existing(conn, 'owner')
     query = """insert into hour_log(email, amount, hour_date, hour_reason) \
-             values (%(email)s, %(hours)s, %(shift_start)s, 'shift')"""
+             values (%(email)s, %(hours)s, %(shift_start)s, 'shift_automated')"""
     user_shifts = [s for s in shifts if 'Manager' not in s['role']
                    and s['email'] not in MANAGERS]
     print('Manager shifts excluded: {}'.format(len(shifts) - len(user_shifts)))

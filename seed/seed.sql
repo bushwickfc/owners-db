@@ -28,7 +28,8 @@ insert into hour_reason(hour_reason, display_name, description)  VALUES
  'Balance carried over from previous database'),
 ('penalty', 'Penalty', 'Missed shift penalty'),
 ('monthly_requirement','Monthly Requirement','Monthly work requirement'),
-('meeting', 'Monthly coop meeting', 'Monthly coop wide committees meeeting');
+('meeting', 'Monthly coop meeting', 'Monthly coop wide committees meeeting'),
+('shift_automated', 'Store Shift (Auto)', 'In store shift (automatically added)');
 
 insert into hour_status(status, display_name, pos_display, owner_price,
                         minimum_balance, maximum_balance) VALUES
