@@ -37,7 +37,7 @@ def debit(conn, date):
                join hour_balance hb on cot.email = hb.email
                where oet.start_date < %s
                and cot.owner_type <> 'staff'
-               and hb.balance > -2 * ot.work_requirement)"""
+               and hb.balance > -1 * ot.work_requirement)"""
     with conn.cursor() as cursor:
         cursor.execute(query, (date, date, cutoff))
         print('Hours debited')
